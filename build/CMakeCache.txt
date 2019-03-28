@@ -235,6 +235,15 @@ Project_BINARY_DIR:STATIC=/home/winata/Stack-d/build
 //Value Computed by CMake
 Project_SOURCE_DIR:STATIC=/home/winata/Stack-d/src
 
+//The directory containing a CMake configuration file for Qt5Core.
+Qt5Core_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Core
+
+//The directory containing a CMake configuration file for Qt5Gui.
+Qt5Gui_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Gui
+
+//The directory containing a CMake configuration file for Qt5Widgets.
+Qt5Widgets_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets
+
 //Path to a library.
 RT_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/librt.so
 
@@ -264,6 +273,90 @@ catkin_DIR:PATH=/opt/ros/kinetic/share/catkin/cmake
 
 //The directory containing a CMake configuration file for cpp_common.
 cpp_common_DIR:PATH=/opt/ros/kinetic/share/cpp_common/cmake
+
+//Value Computed by CMake
+dynamixel_sdk_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/DynamixelSDK/ros
+
+//The directory containing a CMake configuration file for dynamixel_sdk.
+dynamixel_sdk_DIR:PATH=/home/winata/Stack-d/devel/share/dynamixel_sdk/cmake
+
+//Dependencies for the target
+dynamixel_sdk_LIB_DEPENDS:STATIC=general;/opt/ros/kinetic/lib/libroscpp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_signals.so;general;/opt/ros/kinetic/lib/librosconsole.so;general;/opt/ros/kinetic/lib/librosconsole_log4cxx.so;general;/opt/ros/kinetic/lib/librosconsole_backend_interface.so;general;/usr/lib/x86_64-linux-gnu/liblog4cxx.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/opt/ros/kinetic/lib/libroscpp_serialization.so;general;/opt/ros/kinetic/lib/libxmlrpcpp.so;general;/opt/ros/kinetic/lib/librostime.so;general;/opt/ros/kinetic/lib/libcpp_common.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libconsole_bridge.so;
+
+//Value Computed by CMake
+dynamixel_sdk_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/DynamixelSDK/ros
+
+//Value Computed by CMake
+dynamixel_workbench_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench
+
+//Value Computed by CMake
+dynamixel_workbench_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench
+
+//Value Computed by CMake
+dynamixel_workbench_controllers_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_controllers
+
+//Value Computed by CMake
+dynamixel_workbench_controllers_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_controllers
+
+//Value Computed by CMake
+dynamixel_workbench_msgs_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench-msgs/dynamixel_workbench_msgs
+
+//The directory containing a CMake configuration file for dynamixel_workbench_msgs.
+dynamixel_workbench_msgs_DIR:PATH=/home/winata/Stack-d/devel/share/dynamixel_workbench_msgs/cmake
+
+//Value Computed by CMake
+dynamixel_workbench_msgs_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench-msgs/dynamixel_workbench_msgs
+
+//Value Computed by CMake
+dynamixel_workbench_operators_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_operators
+
+//Value Computed by CMake
+dynamixel_workbench_operators_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_operators
+
+//Value Computed by CMake
+dynamixel_workbench_single_manager_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager
+
+//Value Computed by CMake
+dynamixel_workbench_single_manager_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager
+
+//Value Computed by CMake
+dynamixel_workbench_single_manager_gui_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager_gui
+
+//Value Computed by CMake
+dynamixel_workbench_single_manager_gui_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager_gui
+
+//Value Computed by CMake
+dynamixel_workbench_toolbox_BINARY_DIR:STATIC=/home/winata/Stack-d/build/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_toolbox
+
+//The directory containing a CMake configuration file for dynamixel_workbench_toolbox.
+dynamixel_workbench_toolbox_DIR:PATH=/home/winata/Stack-d/devel/share/dynamixel_workbench_toolbox/cmake
+
+//Dependencies for the target
+dynamixel_workbench_toolbox_LIB_DEPENDS:STATIC=general;dynamixel_sdk;general;/opt/ros/kinetic/lib/libroscpp.so;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so;general;/usr/lib/x86_64-linux-gnu/libboost_signals.so;general;/opt/ros/kinetic/lib/librosconsole.so;general;/opt/ros/kinetic/lib/librosconsole_log4cxx.so;general;/opt/ros/kinetic/lib/librosconsole_backend_interface.so;general;/usr/lib/x86_64-linux-gnu/liblog4cxx.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so;general;/opt/ros/kinetic/lib/libroscpp_serialization.so;general;/opt/ros/kinetic/lib/libxmlrpcpp.so;general;/opt/ros/kinetic/lib/librostime.so;general;/opt/ros/kinetic/lib/libcpp_common.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so;general;/usr/lib/x86_64-linux-gnu/libboost_atomic.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libconsole_bridge.so;
+
+//Value Computed by CMake
+dynamixel_workbench_toolbox_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_toolbox
+
+//The directory containing a CMake configuration file for gencpp.
+gencpp_DIR:PATH=/opt/ros/kinetic/share/gencpp/cmake
+
+//The directory containing a CMake configuration file for geneus.
+geneus_DIR:PATH=/opt/ros/kinetic/share/geneus/cmake
+
+//The directory containing a CMake configuration file for genlisp.
+genlisp_DIR:PATH=/opt/ros/kinetic/share/genlisp/cmake
+
+//The directory containing a CMake configuration file for genmsg.
+genmsg_DIR:PATH=/opt/ros/kinetic/share/genmsg/cmake
+
+//The directory containing a CMake configuration file for gennodejs.
+gennodejs_DIR:PATH=/opt/ros/kinetic/share/gennodejs/cmake
+
+//The directory containing a CMake configuration file for genpy.
+genpy_DIR:PATH=/opt/ros/kinetic/share/genpy/cmake
+
+//The directory containing a CMake configuration file for geometry_msgs.
+geometry_msgs_DIR:PATH=/opt/ros/kinetic/share/geometry_msgs/cmake
 
 //Value Computed by CMake
 gmock_BINARY_DIR:STATIC=/home/winata/Stack-d/build/gtest
@@ -314,6 +407,9 @@ locobot_description_v3_BINARY_DIR:STATIC=/home/winata/Stack-d/build/locobot_desc
 //Value Computed by CMake
 locobot_description_v3_SOURCE_DIR:STATIC=/home/winata/Stack-d/src/locobot_description_v3
 
+//The directory containing a CMake configuration file for message_generation.
+message_generation_DIR:PATH=/opt/ros/kinetic/share/message_generation/cmake
+
 //The directory containing a CMake configuration file for message_runtime.
 message_runtime_DIR:PATH=/opt/ros/kinetic/share/message_runtime/cmake
 
@@ -338,8 +434,14 @@ rosgraph_msgs_DIR:PATH=/opt/ros/kinetic/share/rosgraph_msgs/cmake
 //The directory containing a CMake configuration file for roslaunch.
 roslaunch_DIR:PATH=/opt/ros/kinetic/share/roslaunch/cmake
 
+//The directory containing a CMake configuration file for rospy.
+rospy_DIR:PATH=/opt/ros/kinetic/share/rospy/cmake
+
 //The directory containing a CMake configuration file for rostime.
 rostime_DIR:PATH=/opt/ros/kinetic/share/rostime/cmake
+
+//The directory containing a CMake configuration file for sensor_msgs.
+sensor_msgs_DIR:PATH=/opt/ros/kinetic/share/sensor_msgs/cmake
 
 //The directory containing a CMake configuration file for std_msgs.
 std_msgs_DIR:PATH=/opt/ros/kinetic/share/std_msgs/cmake
@@ -452,7 +554,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=4
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=12
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP

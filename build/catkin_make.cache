@@ -1,2 +1,2 @@
-locobot_description_v3
+cmu-16662-robot-ctrl/external/DynamixelSDK/ros:cmu-16662-robot-ctrl/external/dynamixel-workbench-msgs/dynamixel_workbench_msgs:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_controllers:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_operators:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_single_manager_gui:cmu-16662-robot-ctrl/external/dynamixel-workbench/dynamixel_workbench_toolbox:locobot_description_v3
 -DCATKIN_DEVEL_PREFIX=/home/winata/Stack-d/devel -DCMAKE_INSTALL_PREFIX=/home/winata/Stack-d/install -G Unix Makefiles

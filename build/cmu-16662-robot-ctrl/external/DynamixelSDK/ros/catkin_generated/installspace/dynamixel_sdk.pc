@@ -1,0 +1,8 @@
+prefix=/home/winata/Stack-d/install
+
+Name: dynamixel_sdk
+Description: Description of dynamixel_sdk
+Version: 3.7.0
+Cflags: -I/home/winata/Stack-d/install/include
+Libs: -L/home/winata/Stack-d/install/lib -ldynamixel_sdk
+Requires: roscpp rospy

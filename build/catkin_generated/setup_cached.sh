@@ -7,7 +7,4 @@
 # new environment variables
 
 # modified environment variables
-export CMAKE_PREFIX_PATH="/home/winata/Stack-d/devel:$CMAKE_PREFIX_PATH"
 export PWD="/home/winata/Stack-d/build"
-export ROSLISP_PACKAGE_DIRECTORIES="/home/winata/Stack-d/devel/share/common-lisp"
-export ROS_PACKAGE_PATH="/home/winata/Stack-d/src:$ROS_PACKAGE_PATH"

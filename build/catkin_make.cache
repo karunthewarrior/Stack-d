@@ -1,0 +1,2 @@
+locobot_description_v3
+-DCATKIN_DEVEL_PREFIX=/home/winata/Stack-d/devel -DCMAKE_INSTALL_PREFIX=/home/winata/Stack-d/install -G Unix Makefiles

@@ -27,9 +27,22 @@ def forward_kinematics(angles):
     orientation = np.vstack([tf.euler.mat2euler(x[:3,:3],'rxyz') for x in fk_list])
 
     pose = np.hstack([centroids,orientation])
-    return pose
+    fk_mat = fk_list[-1]
+    return pose,fk_list
+
+def jacobian(fk_list):
+    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.063, 0.0001, 0]])
+    axis_list = np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]])
+    jac = []
+    for H,axis in zip(fk_list,axis_list):
+        a = np.dot(H[:3,:3],axis.reshape(-1,1))
+        p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(-1,1)
+        jac_column = np.vstack(np.cross(a,p),a)
+        jac.append(jac_column)
+    return np.hstack(jac)
+
 
 if __name__ == "__main__":
     angles= [0,0,0,90,0]
-    link_pose = forward_kinematics(angles)
+    link_pose,_ = forward_kinematics(angles)
     print(link_pose)

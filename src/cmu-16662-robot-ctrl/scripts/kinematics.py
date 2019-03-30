@@ -31,7 +31,6 @@ def forward_kinematics(angles):
     return pose,fk_list
 
 def jacobian(fk_list):
-    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.063, 0.0001, 0]])
     axis_list = np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]])
     jac = []
     for H,axis in zip(fk_list,axis_list):
@@ -43,8 +42,6 @@ def jacobian(fk_list):
 
 
 if __name__ == "__main__":
-    angles= np.rad2deg([0,0,0,90,0])
+    angles= np.rad2deg([-0.9501,0.8786,0.5130,-1.4157,-0.1997])
     link_pose,fk_list = forward_kinematics(angles)
     jac = jacobian(fk_list)
-    print(fk_list[-1])
-    print(jac)

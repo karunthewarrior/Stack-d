@@ -45,14 +45,14 @@ if __name__ == "__main__":
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
     target_joints = [
-            [0.408, 0.721, -0.471, -1.4, 0.920],
-            [-0.675, 0, 0.23, 1, -0.70]
+            [0,0,0,0,0],
+            [0,0,0,np.pi/2,0]
         ]
     rospy.sleep(2)
-    controller.home_arm()
+    # controller.home_arm()
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):
             pass
 
-    controller.home_arm()
+    # controller.home_arm()

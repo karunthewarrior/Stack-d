@@ -119,7 +119,8 @@ int main(int argc, char** argv){
     return -1;
   }
   std::vector<string> joint_names = {"joint_1","joint_2","joint_3","joint_4","joint_5"};
-  std::vector<double> joint_angles = {-0.9501,0.8786,0.5130,-1.4157,-0.1997};
+  //std::vector<double> joint_angles = {-0.9501,0.8786,0.5130,-1.4157,-0.1997};
+  std::vector<double> joint_angles = {0,0,0,0,0};
   std::vector<double> fk;
   std::vector<std::vector<double>> joints;
   joints = getJointPose(joint_angles,model,joint_names);

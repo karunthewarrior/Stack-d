@@ -42,7 +42,7 @@ def jacobian(fk_list):
 
 def inverse_kinematics(target_pose,max_iter=1000):
     q = np.ones((5,1)) * np.pi/4
-    # q[2] = np.pi/4
+    q[2] = -np.pi/2
     joint_pose,_ = forward_kinematics(q)
     x = np.zeros(3)
     dx = target_pose - x
@@ -57,26 +57,31 @@ def inverse_kinematics(target_pose,max_iter=1000):
         q = q + dq 
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos[-1][:3]
-    if np.any(abs(q) > np.pi/2):
-        print("NONE",q)
+    q = np.array([map_angle(a) for a in q])
+    print(q,"Q",np.rad2deg(q))
+    if (np.all(abs(q) > 0) and np.all(abs(q) < np.pi/2)):
+        return list(q.reshape(-1,)) 
+    else:
+        # print(q)
         return None
-    return list(q.reshape(-1,))
-
-# def map_angle(a):
-#     if a > np.pi:
-#         return float(a - 2*np.pi)
-#     else:
-#         return float(a)
+    
+def map_angle(a):
+    if a >0:
+        a = a % (2*np.pi)
+    else:
+        a = a % (-2*np.pi)
+    if (a > np.deg2rad(270) and a < 2*np.pi):
+        return float(a - 2*np.pi)
+    else:
+        return float(a)
 
 if __name__ == "__main__":
     # angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    q = inverse_kinematics([0.35, 0.0, 0.1])
+    q = inverse_kinematics([0.4, 0.05, 0.1])
     print(np.rad2deg(q))
-    print(q.T)
     print(forward_kinematics(q)[0][-1,0:3])
     
-
 

@@ -43,9 +43,10 @@ def inverse_kinematics(target_pose,max_iter=100):
     q = np.zeros((5,1))
     joint_pose,_ = forward_kinematics(q)
     x = joint_pose[-1]
+    x = np.zeros(6)
     dx = target_pose - x
     i = 0
-    while(np.all(np.absolute(dx) > 1e-12)):
+    while(np.any(np.absolute(dx) > 1e-3)):
         if i == max_iter:
             return None
         i +=1
@@ -66,11 +67,11 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
-    print(angles)
-    link_pose,fk_list = forward_kinematics(angles)
-    print(fk_list[-1])
-    jac = jacobian(fk_list)
-    q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751,  0.09782728, -0.17601728, -0.93904669])
+    # angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
+    # link_pose,fk_list = forward_kinematics(angles)
+    # jac = jacobian(fk_list)
+    # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751,  0.09782728, -0.17601728, -0.93904669])
+    q = inverse_kinematics([0, 0,  0.3,  0, +np.pi/2,0])
+    print(q)
 
 

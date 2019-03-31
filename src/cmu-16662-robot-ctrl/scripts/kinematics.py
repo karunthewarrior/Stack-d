@@ -1,9 +1,10 @@
 import numpy as np
-import transforms3d as tf
+# import transforms3d as tf
+import transformations as tf
 
 def get_H(orig,axis,angle):
     orig = np.vstack([np.hstack([np.eye(3),np.array(orig).reshape(-1,1)]),[0,0,0,1]])
-    axis = np.vstack([np.hstack([tf.axangles.axangle2mat(axis, angle),np.array([0, 0, 0]).reshape(-1,1)]),[0,0,0,1]])
+    axis = tf.quaternion_matrix(tf.quaternion_about_axis(angle,axis))
     H = np.dot(orig,axis)
     return H 
 
@@ -24,7 +25,7 @@ def forward_kinematics(angles):
         fk_list.append(np.linalg.multi_dot(all_H[0:i]))
     
     centroids = np.vstack([H[:3,-1] for H in fk_list]) 
-    orientation = np.vstack([tf.euler.mat2euler(x[:3,:3],'rxyz') for x in fk_list])
+    orientation = np.vstack([tf.euler_from_matrix(x,'rxyz') for x in fk_list])
 
     pose = np.hstack([centroids,orientation])
     return pose,fk_list
@@ -35,21 +36,23 @@ def jacobian(fk_list):
     for H,axis in zip(fk_list,axis_list):
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
-        # jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
-        jac_column = np.cross(a,p).reshape(-1,1)
+        jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
+        # jac_column = np.cross(a,p).reshape(-1,1)
         jac.append(jac_column)
     return np.hstack(jac)
 
 def inverse_kinematics(target_pose,max_iter=1000):
     q = np.ones((5,1)) * np.pi/4
-    q[2] = -np.pi/2
-    q[3] = -np.pi/2
+    # q = np.zeros((5,1))
+    # q[2] = -np.pi/2
+    # q[3] = -np.pi/2
     joint_pose,_ = forward_kinematics(q)
-    x = np.zeros(3)
+    x = np.zeros(6)
     dx = target_pose - x
     i = 0
-    while(np.any(np.absolute(dx) > 1e-4)):
+    while(np.any(np.absolute(dx[0:3]) > 1e-1)):
         if i == max_iter:
+            print("timeout")
             return None
         i +=1
         _,fk_list = forward_kinematics(q)
@@ -57,9 +60,10 @@ def inverse_kinematics(target_pose,max_iter=1000):
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
         q = q + dq 
         final_pos,_ = forward_kinematics(q)
-        dx = target_pose - final_pos[-1][:3]
+        dx = target_pose - final_pos[-1]
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
+    print("fk",final_pos[-1])
     if (np.all(abs(q) > 0) and np.all(abs(q) < np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
@@ -78,10 +82,12 @@ def map_angle(a):
 
 if __name__ == "__main__":
     # angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
-    # link_pose,fk_list = forward_kinematics(angles)
+    # link_pose,fk_list = forward_kinematics([0,0,0,np.pi,0])
+    # print(link_pose[-1])
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    pos_list = [[0.3,0.05,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25],[0.4, 0.05, 0.1]]
+    # pos_list = [[0.3,0.05,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25],[0.4, 0.05, 0.1]]
+    pos_list = [[0.3,0.05,0.1,np.pi,0,0]]
     for pos in pos_list:
         q = inverse_kinematics(pos)
         if q !=None:

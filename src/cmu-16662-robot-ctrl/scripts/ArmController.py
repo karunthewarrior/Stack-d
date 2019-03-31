@@ -45,8 +45,10 @@ class ArmController():
 if __name__ == "__main__":  
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
-    target_joints = [[0,0,0,0,0]]
+    # target_joints = [[0,0,0,90,0]]
     pos_list = [[0.3,0,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25]]
+    pos_list = []
+    target_joints = [[0.48056895, 0.76073892, 0.02609777, 1.5390177,  0.79548688]]
     for pos in pos_list:
         q = kin.inverse_kinematics(pos)
         if q!=None:

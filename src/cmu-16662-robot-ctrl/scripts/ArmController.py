@@ -49,8 +49,11 @@ if __name__ == "__main__":
     pos_list = [[0.3,0,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25]]
     for pos in pos_list:
         q = kin.inverse_kinematics(pos)
-        target_joints.append(q)
-    print(target_joints)
+        if q!=None:
+            target_joints.append(q)
+        else:
+            print("No solution")
+            exit()
     rospy.sleep(2)
     controller.home_arm()
     for joint in target_joints:

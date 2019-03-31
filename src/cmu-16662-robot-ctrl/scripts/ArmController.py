@@ -23,34 +23,35 @@ class ArmController():
     def home_arm(self):
         rospy.loginfo('Going to arm home pose')
         self.set_joint_state(np.zeros(5))
+        # rospy.sleep(5)
         while(not controller.has_converged()):
             pass
 
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
-        self.joint_state = np.array(joint_state.position)
+        self.joint_state = np.array(joint_state.position)[0:5]
 
     def has_converged(self):
         converged = False
         if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
-            if (self.time - self.history[0]).to_sec() > 1:
+            if (self.time - self.history[0]).to_sec() > 0.5:
                 converged = True
         else:
             self.history = []   
         return converged
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
     target_joints = [[0,0,0,0,0]]
-    pos_list = [[0.3,0,0.1],[0.3,0.1,0.15]]
+    pos_list = [[0.3,0,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25]]
     for pos in pos_list:
         q = kin.inverse_kinematics(pos)
         target_joints.append(q)
     print(target_joints)
-    # rospy.sleep(2)
+    rospy.sleep(2)
     controller.home_arm()
     for joint in target_joints:
         controller.set_joint_state(joint)

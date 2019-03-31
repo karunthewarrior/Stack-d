@@ -35,18 +35,19 @@ def jacobian(fk_list):
     for H,axis in zip(fk_list,axis_list):
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
-        jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
+        # jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
+        jac_column = np.cross(a,p).reshape(-1,1)
         jac.append(jac_column)
     return np.hstack(jac)
 
-def inverse_kinematics(target_pose,max_iter=100):
-    q = np.zeros((5,1))
+def inverse_kinematics(target_pose,max_iter=1000):
+    q = np.ones((5,1)) * np.pi/4
+    # q[2] = np.pi/4
     joint_pose,_ = forward_kinematics(q)
-    x = joint_pose[-1]
-    x = np.zeros(6)
+    x = np.zeros(3)
     dx = target_pose - x
     i = 0
-    while(np.any(np.absolute(dx) > 1e-3)):
+    while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
             return None
         i +=1
@@ -54,24 +55,27 @@ def inverse_kinematics(target_pose,max_iter=100):
         jac = jacobian(fk_list)
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
         q = q + dq 
-        # print(q)
         final_pos,_ = forward_kinematics(q)
-        dx = target_pose - final_pos[-1]
-    q = [map_angle(a) for a in q%(2*np.pi)]
+        dx = target_pose - final_pos[-1][:3]
+    if np.any(abs(q) > np.pi/2):
+        print("NONE",q)
+        return None
     return q
 
-def map_angle(a):
-    if a > np.pi:
-        return float(a - 2*np.pi)
-    else:
-        return float(a)
+# def map_angle(a):
+#     if a > np.pi:
+#         return float(a - 2*np.pi)
+#     else:
+#         return float(a)
 
 if __name__ == "__main__":
     # angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
-    # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751,  0.09782728, -0.17601728, -0.93904669])
-    q = inverse_kinematics([0, 0,  0.3,  0, +np.pi/2,0])
-    print(q)
+    # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
+    q = inverse_kinematics([0.35, 0.0, 0.1])
+    print(np.rad2deg(q))
+    print(forward_kinematics(q)[0][-1,0:3])
+    
 
 

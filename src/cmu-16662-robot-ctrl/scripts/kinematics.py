@@ -60,7 +60,7 @@ def inverse_kinematics(target_pose,max_iter=1000):
     if np.any(abs(q) > np.pi/2):
         print("NONE",q)
         return None
-    return q
+    return list(q.reshape(-1,))
 
 # def map_angle(a):
 #     if a > np.pi:
@@ -75,6 +75,7 @@ if __name__ == "__main__":
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
     q = inverse_kinematics([0.35, 0.0, 0.1])
     print(np.rad2deg(q))
+    print(q.T)
     print(forward_kinematics(q)[0][-1,0:3])
     
 

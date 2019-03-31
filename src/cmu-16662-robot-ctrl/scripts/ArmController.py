@@ -3,7 +3,7 @@ import sys
 import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
-
+import kinematics as kin
 
 class ArmController():
     def __init__(self):
@@ -44,12 +44,14 @@ class ArmController():
 if __name__ == "__main__":
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
-    target_joints = [
-            [0,0,0,0,0],
-            [0,0,0,np.pi/2,0]
-        ]
-    rospy.sleep(2)
-    # controller.home_arm()
+    target_joints = [[0,0,0,0,0]]
+    pos_list = [[0.3,0,0.1],[0.3,0.1,0.15]]
+    for pos in pos_list:
+        q = kin.inverse_kinematics(pos)
+        target_joints.append(q)
+    print(target_joints)
+    # rospy.sleep(2)
+    controller.home_arm()
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):

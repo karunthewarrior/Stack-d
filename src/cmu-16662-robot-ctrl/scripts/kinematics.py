@@ -51,7 +51,7 @@ def inverse_kinematics(target_pose,max_iter=1000):
     x = np.zeros(3)
     dx = target_pose - x
     i = 0
-    while(np.any(np.absolute(dx) > 1e-3)):
+    while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
             print("timeout")
             return None
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    pos_list = [[0.3,0.05,0.1],[0.3,0.1,0.25],[0.3,0.05,0.3]]
+    pos_list = [[0.3,0.05,0.1],[0.3,0.1,0.1],[0.3,-0.1,0.1]]
     for pos in pos_list:
         q = inverse_kinematics(pos)
         if q !=None:

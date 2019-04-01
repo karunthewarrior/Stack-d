@@ -46,7 +46,8 @@ if __name__ == "__main__":
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
     target_joints = [[0,0,0,0,0]]
-    pos_list = [[0.3,0,0.1],[0.3,0.1,0.15],[0.25,0.1,0.25]]
+    target_joints = []
+    pos_list = [[0.1,0,0.2]]
     for pos in pos_list:
         q = kin.inverse_kinematics(pos)
         if q!=None:
@@ -55,7 +56,7 @@ if __name__ == "__main__":
             print("No solution")
             exit()
     rospy.sleep(2)
-    controller.home_arm()
+    # controller.home_arm()
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):

@@ -21,12 +21,35 @@ class camera_calib:
         except:
             self.ar_position = np.array([None,None,None])
 
+def get_block(arm_pt):
+    x,y,z = arm_pt
+    a1 = np.array([x,y,z,1,0,0,0,0,0,0,0,0]).reshape(1,-1)
+    a2 = np.array([0,0,0,0,x,y,z,1,0,0,0,0]).reshape(1,-1)
+    a3 = np.array([0,0,0,0,0,0,0,0,x,y,z,1]).reshape(1,-1)
+    A = np.vstack([a1,a2,a3])
+    return A
+
+def getA_x(p1,p2):
+    return np.array([p1[0],p1[1],1,0,0,0,-p1[0]*p2[0],-p2[0]*p1[1],-p2[0]])
+
+def getA_y(p1,p2):
+    return np.array([0,0,0,p1[0],p1[1],1,-p1[0]*p2[1],-p2[1]*p1[1],-p2[1]])
+
+def computeH(p1, p2):
+    A = np.vstack([np.vstack([getA_x(pp1,pp2),getA_y(pp1,pp2)]) for pp1,pp2 in zip(p1,p2)])
+    u,s,v = np.linalg.svd(A)
+    h = v[-1]
+    H2to1 = (h/h[-1]).reshape(3,3)
+    return H2to1
+
 if __name__ == "__main__":
     rospy.init_node("camera_calib", anonymous=True)
     cam = camera_calib()
     controller = controller.ArmController()
     rospy.sleep(2)
     target_joints = np.deg2rad([[0,-10,20,-70,0],[0,-10,40,-70,0]])
+    arm_pts_list = []
+    cam_pts_list = []
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):
@@ -35,3 +58,9 @@ if __name__ == "__main__":
         arm_pos = kin.forward_kinematics(joint)[0][3,:3]
         rospy.loginfo(cam_pos)
         rospy.loginfo(arm_pos)
+        arm_pts_list.append(arm_pos)
+        cam_pts_list.append(cam_pos)
+    rospy.loginfo(arm_pts_list)
+    rospy.loginfo(cam_pts_listss)
+
+

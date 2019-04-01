@@ -1,8 +1,0 @@
-prefix=/home/winata/Stack-d/install
-
-Name: locobot_description_v3
-Description: Description of locobot_description_v3
-Version: 1.0.0
-Cflags: 
-Libs: -L/home/winata/Stack-d/install/lib 
-Requires: 

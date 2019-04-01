@@ -1,3 +1,5 @@
 *.DS_*
 .catkin_workspace
 *.pyc
+devel/
+build/

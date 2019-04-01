@@ -1,8 +1,0 @@
-prefix=/home/winata/Stack-d/install
-
-Name: dynamixel_workbench_operators
-Description: Description of dynamixel_workbench_operators
-Version: 1.0.0
-Cflags: 
-Libs: -L/home/winata/Stack-d/install/lib 
-Requires: roscpp dynamixel_workbench_msgs

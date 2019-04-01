@@ -1,8 +1,0 @@
-prefix=/home/winata/Stack-d/install
-
-Name: dynamixel_workbench_msgs
-Description: Description of dynamixel_workbench_msgs
-Version: 1.0.0
-Cflags: -I/home/winata/Stack-d/install/include
-Libs: -L/home/winata/Stack-d/install/lib 
-Requires: std_msgs message_runtime

@@ -43,14 +43,15 @@ def jacobian(fk_list):
 
 def inverse_kinematics(target_pose,max_iter=1000):
     q = np.ones((5,1)) * np.pi/4
-    # q = np.zeros((5,1))
-    # q[2] = -np.pi/2
-    # q[3] = -np.pi/2
+    q = np.zeros((5,1))
+    q[1] = -np.pi/4
+    q[2] = -np.pi/2
+    q[3] = -np.pi/2
     joint_pose,_ = forward_kinematics(q)
     x = np.zeros(6)
     dx = target_pose - x
     i = 0
-    while(np.any(np.absolute(dx[0:3]) > 1e-1)):
+    while(np.any(np.absolute(dx) > 1e-1)):
         if i == max_iter:
             print("timeout")
             return None
@@ -63,7 +64,6 @@ def inverse_kinematics(target_pose,max_iter=1000):
         dx = target_pose - final_pos[-1]
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
-    print("fk",final_pos[-1])
     if (np.all(abs(q) > 0) and np.all(abs(q) < np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
@@ -90,6 +90,7 @@ if __name__ == "__main__":
     pos_list = [[0.3,0.05,0.1,np.pi,0,0]]
     for pos in pos_list:
         q = inverse_kinematics(pos)
+        print(forward_kinematics(q)[0][-1],"fk")
         if q !=None:
             print(np.rad2deg(q))
     # print(forward_kinematics(q)[0][-1,0:3])

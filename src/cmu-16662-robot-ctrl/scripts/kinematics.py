@@ -41,11 +41,12 @@ def jacobian(fk_list):
     return np.hstack(jac)
 
 def inverse_kinematics(target_pose,max_iter=1000):
-    q = np.ones((4,1)) * -np.pi/4
-    q[0] = -np.pi/4
-    q[1] = np.pi/2
-    q[2] = np.pi/2
+    q = np.ones((5,1)) * np.pi/4
+    # q[0] = -np.pi/4
+    # q[1] = np.pi/2
+    # q[2] = np.pi/2
     q[3] =  0
+    q[4] = 0
     joint_pose,_ = forward_kinematics(q)
     x = np.zeros(3)
     dx = target_pose - x
@@ -58,7 +59,7 @@ def inverse_kinematics(target_pose,max_iter=1000):
         _,fk_list = forward_kinematics(q)
         jac = jacobian(fk_list)
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
-        q = q + dq 
+        q[:4] = q[:4] + dq 
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos[3][:3]  #third joint
     q = np.array([map_angle(a) for a in q])

@@ -26,7 +26,7 @@ if __name__ == "__main__":
     cam = camera_calib()
     controller = controller.ArmController()
     rospy.sleep(2)
-    target_joints = [[0,-10,20,-70,0]]
+    target_joints = np.deg2rad([[0,-10,20,-70,0],[0,-10,40,-70,0]])
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):

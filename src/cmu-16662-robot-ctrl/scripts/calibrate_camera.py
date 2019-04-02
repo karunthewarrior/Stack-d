@@ -5,6 +5,7 @@ from ar_track_alvar_msgs.msg import AlvarMarkers
 import kinematics as kin
 import ArmController as controller
 import pickle
+import cv2
 
 
 class camera_calib:
@@ -17,7 +18,9 @@ class camera_calib:
         time = camera_pose.header.stamp
         try:
             ar_position_obj = camera_pose.markers[0].pose.pose.position
+            ar_orient_obj = camera_pose.markers[0].pose.pose.orientation
             self.ar_position = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z])
+            self.ar_orient = np.array([ar_orient_obj.x,ar_orient_obj.y,ar_orient_obj.z,ar_orient_obj.w])
             # rospy.loginfo(self.ar_position)
         except:
             self.ar_position = np.array([None,None,None])
@@ -42,6 +45,17 @@ def computeH(p1, p2):
     h = v[-1]
     H2to1 = (h/h[-1]).reshape(3,3)
     return H2to1
+def compute_transformation(arm_pts_list,cam_pts_list):
+    arm_pts = np.vstack((arm_pts_list))
+    cam_pts = np.vstack((cam_pts_list))
+    K = np.array([[619.1472778320312, 0.0, 313.42169189453125],[ 0.0, 619.0415649414062, 242.69955444335938],[ 0.0, 0.0, 1.0]])
+    pixel_location = np.dot(K,np.transpose(cam_pts))
+    pixel_location = pixel_location/pixel_location[-1,:]
+    pixel_location = pixel_location[0:2,:]
+    pixel_location = np.transpose(pixel_location)
+    distcoeff = None
+    H = cv2.solvePnPRansac(arm_pts,pixel_location,K,distcoeff)
+    print(H)
 
 if __name__ == "__main__":
     rospy.init_node("camera_calib", anonymous=True)
@@ -56,14 +70,19 @@ if __name__ == "__main__":
         while(not controller.has_converged()):
             pass
         cam_pos = cam.ar_position
-        arm_pos = kin.forward_kinematics(joint)[0][3,:3]
+        cam_orient = cam.ar_orient
+        arm_pos = kin.forward_kinematics(joint)[0][-1,:3]+np.array([0.029,-0.001,0.043])
         rospy.loginfo(cam_pos)
         rospy.loginfo(arm_pos)
         arm_pts_list.append(arm_pos)
         cam_pts_list.append(cam_pos)
     rospy.loginfo(arm_pts_list)
     rospy.loginfo(cam_pts_list)
-    pickle.dump(arm_pts_list, open("arm_pts_pos.p","wb"))
-    pickle.dump(cam_pts_list, open("cam_pts_pos.p","wb"))
+    # pickle.dump(arm_pts_list, open("arm_pts_pos.p","wb"))
+    # pickle.dump(cam_pts_list, open("cam_pts_pos.p","wb"))
+    arm_pts_list = pickle.load(open("arm_pts_pos.p","rb"))
+    cam_pts_list = pickle.load(open("cam_pts_pos.p","rb"))
+    H = compute_transformation(arm_pts_list,cam_pts_list)
+
 
 

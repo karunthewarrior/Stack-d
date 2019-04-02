@@ -14,7 +14,7 @@ def rot_H(R):
     return np.vstack([np.hstack([R,np.zeros(3).reshape(-1,1)]),[0,0,0,1]])
 
 def forward_kinematics(angles):
-    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.063, 0.0001, 0]])
+    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.193, 0, 0]])
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]]
  
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
@@ -26,7 +26,8 @@ def forward_kinematics(angles):
     centroids = np.vstack([H[:3,-1] for H in fk_list]) 
     orientation = np.vstack([tf.euler.mat2euler(x[:3,:3],'rxyz') for x in fk_list])
 
-    pose = np.hstack([centroids,orientation])
+    pose_mat = np.hstack([centroids,orientation])
+    pose = {"joint_1":pose_mat[0],"joint_2":pose_mat[1],"joint_3":pose_mat[2],"joint_4":pose_mat[3],"gripper":pose_mat[4]}
     return pose,fk_list
 
 def jacobian(fk_list):
@@ -42,14 +43,14 @@ def jacobian(fk_list):
 
 def inverse_kinematics(target_pose,max_iter=1000):
     q = np.ones((5,1)) * np.pi/4
+    gripper_offset = np.array([0, 0, 0.193])
     # q[0] = -np.pi/4
     # q[1] = np.pi/2
-    # q[2] = np.pi/2
-    q[3] =  0
+    q[2] = np.pi/6
+    # q[3] = 0
     q[4] = 0
-    joint_pose,_ = forward_kinematics(q)
     x = np.zeros(3)
-    dx = target_pose - x
+    dx = (target_pose+gripper_offset) - x
     i = 0
     while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
@@ -61,7 +62,7 @@ def inverse_kinematics(target_pose,max_iter=1000):
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
         q[:4] = q[:4] + dq 
         final_pos,_ = forward_kinematics(q)
-        dx = target_pose - final_pos[3][:3]  #third joint
+        dx = target_pose - final_pos["joint_4"][:3] 
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
     if (np.all(abs(q) >= 0) and np.all(abs(q) <= np.pi/2)):
@@ -87,9 +88,11 @@ if __name__ == "__main__":
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    pos_list = [[0.3,0.05,0.1],[0.3,0.1,0.1],[0.3,-0.1,0.1]]
+    pos_list = [[0.3,0,0.1],[0.3,0,0.1],[0.3,0,0.1]]
     for pos in pos_list:
         q = inverse_kinematics(pos)
+        print(q,"WQEQWE")
+        print("FK",forward_kinematics(q)[0]["joint_4"])
         if q !=None:
             print(np.rad2deg(q))
     # print(forward_kinematics(q)[0][-1,0:3])

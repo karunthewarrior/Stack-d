@@ -188,7 +188,7 @@ void PositionControl::jointStatePublish()
       joint_name << "joint_" << (index + 1);
       position_motor = dxl_wb_->convertValue2Radian(dxl_id_[index], present_position[index]);
       velocity_motor = dxl_wb_->convertValue2Velocity(dxl_id_[index], present_velocity[index]);
-    } else if ((index == 2)) {
+    } else if ((index == 2) || (index == 6)) {
       continue;
     } else {
       joint_name << "joint_" << index;
@@ -236,12 +236,12 @@ bool PositionControl::jointCommandMsgCallback(dynamixel_workbench_msgs::JointCom
 
 void PositionControl::goalJointPositionCallback(const sensor_msgs::JointState::ConstPtr &msg)
 {
-  if (msg->position.size() != 6) {
+  if (msg->position.size() != 5) {
     ROS_ERROR("Invalid joint state, execution aborted");
   } else {
     double goal_position[dxl_cnt_] = {0.0, };
 
-    for (int index = 0; index < 6; index++)
+    for (int index = 0; index < 5; index++)
       goal_position[index] = msg->position.at(index);
 
     int32_t goal_dxl_position[dxl_cnt_] = {0, };

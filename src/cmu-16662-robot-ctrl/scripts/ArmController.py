@@ -22,18 +22,18 @@ class ArmController():
 
     def home_arm(self):
         rospy.loginfo('Going to arm home pose')
-        self.set_joint_state(np.zeros(6))
+        self.set_joint_state(np.zeros(5))
         # rospy.sleep(5)
         while(not controller.has_converged()):
             pass
 
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
-        self.joint_state = np.array(joint_state.position)[0:6]
+        self.joint_state = np.array(joint_state.position)[0:5]
 
     def has_converged(self):
         converged = False
-        if(np.linalg.norm(self.joint_state[:5]-self.joint_target[:5]) < 0.1):
+        if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 0.5:
@@ -45,14 +45,12 @@ class ArmController():
 if __name__ == "__main__":  
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
-    # target_joints = np.deg2rad([[0,0,0,0,0,-50],[0,10,20,0,0,0]])
-    # target_joints = [[0,0,0,0,-0.87],[0,0,0,0,-0.3]]
+    # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
-    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1]]
-    gripper_list = [True,True,False,False]
-    for pos,grip in zip(pos_list,gripper_list):
-        q = kin.inverse_kinematics(pos,grip)
-        # print(kin.forward_kinematics(q)[0]["joint_4"])
+    pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
+    for pos in pos_list:
+        q = kin.inverse_kinematics(pos)
+        print(kin.forward_kinematics(q)[0]["joint_4"])
         if q!=None:
             target_joints.append(q)
         else:
@@ -60,11 +58,10 @@ if __name__ == "__main__":
             exit()
     rospy.sleep(2)
     # print(target_joints)
-    controller.home_arm()
-    rospy.loginfo(target_joints)
+    # controller.home_arm()
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):
             pass
-        rospy.sleep(4)
-    controller.home_arm()
+
+    # controller.home_arm()

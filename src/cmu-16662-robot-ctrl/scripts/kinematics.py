@@ -100,6 +100,4 @@ if __name__ == "__main__":
         print("FK",forward_kinematics(q)[0]["joint_4"])
         if q !=None:
             print(np.rad2deg(q))
-    # print(forward_kinematics(q)[0][-1,0:3])
-    
-
+# print(forward_kinematics(q)[0][-1,0:3])

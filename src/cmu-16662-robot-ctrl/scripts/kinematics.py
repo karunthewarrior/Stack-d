@@ -41,8 +41,8 @@ def jacobian(fk_list):
         jac.append(jac_column)
     return np.hstack(jac)
 
-def inverse_kinematics(target_pose,max_iter=1000,offset=True):
-    q = np.ones((5,1)) * np.pi/4
+def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
+    q = np.ones((6,1)) * np.pi/4
     gripper_offset = np.array([0, 0, 0.193])
     # print(target_pose,"PRE KARUN")
     if offset:
@@ -53,6 +53,10 @@ def inverse_kinematics(target_pose,max_iter=1000,offset=True):
     q[2] = np.pi/6
     q[3] = 0
     q[4] = 0
+    if open_grip:
+        q[5] = -0.87
+    else:
+        q[5] = -0.3
     x = np.zeros(3)
     dx = target_pose - x
     i = 0
@@ -93,7 +97,7 @@ if __name__ == "__main__":
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    pos_list = [[0.3,0,-0.35]]
+    pos_list = [[0.3,0,0.1]]
     for pos in pos_list:
         q = inverse_kinematics(pos)
         print(q,"WQEQWE")

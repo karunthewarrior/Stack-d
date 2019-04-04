@@ -59,7 +59,7 @@ def get_transform():
 
     H_world_to_color = np.dot(H_world_to_camera_link,H_camera_link_to_color)
 
-    rot_color_to_optical = eulerAnglesToRotationMatrix((-3.14/2,0,-3.14/2))
+    rot_color_to_optical = eulerAnglesToRotationMatrix((-np.pi()/2,0,-np.pi()/2))
     H_color_to_optical = np.eye(4)
     H_color_to_optical[0:3,0:3] = rot_color_to_optical
     H_world_to_optical = np.dot(H_world_to_color,H_color_to_optical)
@@ -89,5 +89,3 @@ if __name__ =="__main__":
     estimator= tag_estimator()
     rospy.sleep(1)
     rospy.spin()
-    # while not rospy.is_shutdown():
-    #     estimator.set_point()

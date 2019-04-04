@@ -56,7 +56,7 @@ def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
     if open_grip:
         q[5] = -0.87
     else:
-        q[5] = -0.33
+        q[5] = -0.28
     x = np.zeros(3)
     dx = target_pose - x
     i = 0

@@ -52,9 +52,9 @@ if __name__ == "__main__":
     # target_joints = np.deg2rad([[0,0,0,0,0,-50],[0,10,20,0,0,0]])
     # target_joints = [[0,0,0,0,-0.87],[0,0,0,0,-0.3]]
     target_joints = []
-    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03]]
+    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03],[0.25,0.25,-0.03]]
     # pos_list = [[0.25,0.2,0.1]]
-    gripper_list = [True,True,False,False,False,False,True]
+    gripper_list = [True,True,False,False,False,False,False,True]
     for pos,grip in zip(pos_list,gripper_list):
         q = kin.inverse_kinematics(pos,grip)
         # print(kin.forward_kinematics(q)[0]["joint_4"])
@@ -71,4 +71,4 @@ if __name__ == "__main__":
         while(not controller.has_converged()):
             pass
         # rospy.sleep(4)
-# controller.home_arm()
+controller.home_arm()

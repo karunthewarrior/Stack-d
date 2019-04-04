@@ -69,6 +69,7 @@ if __name__ == "__main__":
     for joint in target_joints:
         controller.set_joint_state(joint)
         while(not controller.has_converged()):
+            # rospy.loginfo("not")
             pass
         # rospy.sleep(4)
 # controller.home_arm()

@@ -50,13 +50,13 @@ def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
     # print(target_pose,"POSE KaruN")
     q[0] = -np.pi/4
     # q[1] = np.pi/2
-    q[2] = np.pi/6
+    q[2] = np.pi/5
     q[3] = 0
     q[4] = 0
     if open_grip:
         q[5] = -0.87
     else:
-        q[5] = -0.3
+        q[5] = -0.33
     x = np.zeros(3)
     dx = target_pose - x
     i = 0
@@ -72,9 +72,10 @@ def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos["joint_4"][:3]
     q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    q[4] = -q[0]
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
-    if (np.all(abs(q) >= 0) and np.all(abs(q) <= np.pi/2)):
+    if (np.all(abs(q[:3]) >= 0) and np.all(abs(q[:3]) <= np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
         # print(q)

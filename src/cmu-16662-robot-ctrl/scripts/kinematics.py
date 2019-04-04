@@ -37,8 +37,8 @@ def jacobian(fk_list):
     for H,axis in zip(fk_list[:3],axis_list[:3]):  #only first three joints
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
-        jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
-        # jac_column = np.cross(a,p).reshape(-1,1)
+        # jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
+        jac_column = np.cross(a,p).reshape(-1,1)
         jac.append(jac_column)
     return np.hstack(jac)
 
@@ -66,16 +66,16 @@ def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
             print("timeout")
             return None
         i +=1
-        _,fk_list = forward_kinematics(q)
+        _,fk_list = forward_kinematics(q[:5])
         jac = jacobian(fk_list)
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
         q[:3] = q[:3] + dq 
-        final_pos,_ = forward_kinematics(q)
+        final_pos,_ = forward_kinematics(q[:5])
         dx = target_pose - final_pos["joint_4"][:3]
     q[3] = np.pi/2 - final_pos["joint_4"][4] 
     q[4] = -q[0]
     q = np.array([map_angle(a) for a in q])
-    print(q,"Q",np.rad2deg(q))
+    # print(q,"Q",np.rad2deg(q))
     if (np.all(abs(q[:3]) >= 0) and np.all(abs(q[:3]) <= np.pi/2)):
         return list(q.reshape(-1,)) 
     else:

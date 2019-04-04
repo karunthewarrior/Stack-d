@@ -19,13 +19,13 @@ class tag_estimator:
             ar_position_obj = tag.markers[0].pose.pose.position
             self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
         except:
-            self.position_camera = np.array([0,0,0,1])
+            self.position_camera = np.array([0,0,0,0])
 
         self.set_point()
 
     def set_point(self):
         pub_data=Float64MultiArray()
-        point = np.dot(self.transform,self.position_camera)
+        point = np.dot(self.transform,self.position_camera)[:3]
         pub_data.data = point
         rospy.loginfo(pub_data)
         self.pub.publish(pub_data)

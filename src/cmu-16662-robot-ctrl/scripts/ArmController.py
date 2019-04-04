@@ -4,6 +4,7 @@ import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
 import kinematics as kin
+from std_msgs.msg import Float64MultiArray
 
 class ArmController():
     def __init__(self):
@@ -44,17 +45,30 @@ class ArmController():
         return converged
 
 
+class tag_pos():
+    def __init__(self):
+        self.marker_topic = '/marker_pos'
+        self.sub = rospy.Subscriber(self.marker_topic,Float64MultiArray,self.get_position)
+
+    def get_position(self,tag):
+        self.tag_pos = np.array(tag.data)
+        rospy.loginfo(self.tag_pos)
 
 
 if __name__ == "__main__":  
     rospy.init_node('controller_test', anonymous=True)
     controller = ArmController()
+    tag_position = tag_pos()
+    rospy.sleep(2)
+    block_pos = np.array(tag_position.tag_pos) + np.array([0.05,0,0.15])
     # target_joints = np.deg2rad([[0,0,0,0,0,-50],[0,10,20,0,0,0]])
     # target_joints = [[0,0,0,0,-0.87],[0,0,0,0,-0.3]]
     target_joints = []
-    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03]]
+    # pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03]]
+    pos_list = [block_pos,block_pos-np.array([0,0,0.1]),block_pos-np.array([0,0,0.1]),block_pos]
+    gripper_list = [True,True,False,False]
     # pos_list = [[0.25,0.2,0.1]]
-    gripper_list = [True,True,False,False,False,False,True]
+    # gripper_list = [True,True,False,False,False,False,True]
     for pos,grip in zip(pos_list,gripper_list):
         q = kin.inverse_kinematics(pos,grip)
         # print(kin.forward_kinematics(q)[0]["joint_4"])
@@ -62,7 +76,7 @@ if __name__ == "__main__":
             target_joints.append(q)
         else:
             rospy.loginfo("No solution")
-    rospy.sleep(2)
+    # rospy.sleep(2)
     # print(target_joints)
     # controller.home_arm()
     rospy.loginfo(target_joints)

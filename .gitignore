@@ -3,3 +3,5 @@
 *.pyc
 devel/
 build/
+*.xml
+*.png

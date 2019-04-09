@@ -4,6 +4,7 @@ import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
 import kinematics as kin
+import pickle
 
 class ArmController():
     def __init__(self):
@@ -13,6 +14,8 @@ class ArmController():
         self.pub = rospy.Publisher(self.goal_topic,JointState, queue_size=1)
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         self.history = []
+        self.goal = []
+        self.state = []
 
     def set_joint_state(self,joint_target):
         self.joint_target = joint_target
@@ -30,11 +33,13 @@ class ArmController():
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
         self.joint_state = np.array(joint_state.position)[0:6]
+        self.goal.append(self.joint_target)
+        self.state.append(self.joint_state)
 
     def has_converged(self):
         converged = False
         # rospy.loginfo(np.linalg.norm(self.joint_state[5]-self.joint_target[5]))
-        if(np.linalg.norm(self.joint_state[:5]-self.joint_target[:5]) < 0.1 and np.linalg.norm(self.joint_state[5]-self.joint_target[5]) < 0.1):
+        if(np.all(abs(self.joint_state[:5]-self.joint_target[:5]) < 0.1) and np.linalg.norm(self.joint_state[5]-self.joint_target[5]) < 0.1):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 0.5:
@@ -70,5 +75,8 @@ if __name__ == "__main__":
         controller.set_joint_state(joint)
         while(not controller.has_converged()):
             pass
+    pickle.dump(controller.goal,open('goal_states.p','wb'))
+    pickle.dump(controller.state,open('joint_states.p','wb'))
+
         # rospy.sleep(4)
 # controller.home_arm()

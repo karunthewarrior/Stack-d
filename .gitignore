@@ -3,3 +3,4 @@
 *.pyc
 devel/
 build/
+*.p

@@ -10,8 +10,13 @@ class ArmController():
     def __init__(self):
         self.goal_topic = '/goal_dynamixel_position'
         self.joint_state_topic = '/joint_states'
+        self.gripper_open_topic = '/gripper/open'
+        self.gripper_close_topic = '/gripper/close'
+
         self.joint_target = np.zeros(5)
         self.pub = rospy.Publisher(self.goal_topic,JointState, queue_size=1)
+        self.open_pub = rospy.Publisher(self.gripper_open_topic,Empty, queue_size=1)
+        self.close_pub = rospy.Publisher(self.gripper_close_topic,Empty, queue_size=1)
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         self.history = []
 
@@ -27,6 +32,14 @@ class ArmController():
         # rospy.sleep(5)
         while(not self.has_converged()):
             pass
+
+    def open(self):
+        empty_msg = Empty()
+        self.open_pub.publish(empty_msg)
+
+    def close(self):
+        empty_msg = Empty()
+        self.close_pub.publish(empty_msg)   
 
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
@@ -111,11 +124,12 @@ if __name__ == "__main__":
     rospy.sleep(2)
 
 
-    print(target_joints)
+    # print(target_joints)
     arm_controller.home_arm()
+    arm_controller.open()
     for joint in target_joints:
         arm_controller.set_joint_state(joint)
         while(not arm_controller.has_converged()):
             pass
-
+    arm_controller.close()
     # controller.home_arm()

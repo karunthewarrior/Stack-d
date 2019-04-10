@@ -37,8 +37,8 @@ def jacobian(fk_list):
     for H,axis in zip(fk_list[:3],axis_list[:3]):  #only first three joints
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
-        jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
-        # jac_column = np.cross(a,p).reshape(-1,1)
+        # jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
+        jac_column = np.cross(a,p).reshape(-1,1)
         jac.append(jac_column)
     return np.hstack(jac)
 

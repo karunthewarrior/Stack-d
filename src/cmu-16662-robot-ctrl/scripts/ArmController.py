@@ -25,7 +25,7 @@ class ArmController():
         rospy.loginfo('Going to arm home pose')
         self.set_joint_state(np.zeros(5))
         # rospy.sleep(5)
-        while(not controller.has_converged()):
+        while(not self.has_converged()):
             pass
 
     def get_joint_state(self,joint_state):
@@ -91,31 +91,31 @@ if __name__ == "__main__":
     target_joints = []
     pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
 
-    for tilt in target_tilt:
-        tilt_controller.set_cam_state(tilt)
-        while(not tilt_controller.has_converged()):
-            pass
-    for pan in target_pan:
-        pan_controller.set_cam_state(pan)
-        while(not pan_controller.has_converged()):
-            pass
-
-    # for pos in pos_list:
-    #     q = kin.inverse_kinematics(pos)
-    #     print(kin.forward_kinematics(q)[0]["joint_4"])
-    #     if q!=None:
-    #         target_joints.append(q)
-    #     else:
-    #         print("No solution")
-    #         exit()
-    # rospy.sleep(2)
-
-
-    # print(target_joints)
-    # controller.home_arm()
-    # for joint in target_joints:
-    #     arm_controller.set_joint_state(joint)
-    #     while(not arm_controller.has_converged()):
+    # for tilt in target_tilt:
+    #     tilt_controller.set_cam_state(tilt)
+    #     while(not tilt_controller.has_converged()):
     #         pass
+    # for pan in target_pan:
+    #     pan_controller.set_cam_state(pan)
+    #     while(not pan_controller.has_converged()):
+    #         pass
+
+    for pos in pos_list:
+        q = kin.inverse_kinematics(pos)
+        print(kin.forward_kinematics(q)[0]["joint_4"])
+        if q!=None:
+            target_joints.append(q)
+        else:
+            print("No solution")
+            exit()
+    rospy.sleep(2)
+
+
+    print(target_joints)
+    arm_controller.home_arm()
+    for joint in target_joints:
+        arm_controller.set_joint_state(joint)
+        while(not arm_controller.has_converged()):
+            pass
 
     # controller.home_arm()

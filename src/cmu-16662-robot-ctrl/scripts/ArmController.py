@@ -52,7 +52,7 @@ class CamController():
         self.sub = rospy.Subscriber(self.cam_state_topic,Float64,self.get_cam_state)
         self.history = []
 
-    def set_joint_state(self,cam_target):
+    def set_cam_state(self,cam_target):
         self.cam_target = cam_target
         cam_state = Float64()
         cam_state.data = cam_target
@@ -65,7 +65,7 @@ class CamController():
             pass
 
     def get_cam_state(self,cam_state):
-        self.time = cam_state.header.stamp
+        self.time = rospy.get_rostime()
         self.cam_state = cam_state.data
 
     def has_converged(self):
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     pan_controller = CamController('/pan/state','/pan/command')
     target_pan = np.deg2rad([0,20,-20,0])
     target_tilt = np.deg2rad([0,20,-20,0])
-
+    rospy.sleep(2)
     # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
     pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
@@ -95,7 +95,10 @@ if __name__ == "__main__":
         tilt_controller.set_cam_state(tilt)
         while(not tilt_controller.has_converged()):
             pass
-
+    for pan in target_pan:
+        pan_controller.set_cam_state(pan)
+        while(not pan_controller.has_converged()):
+            pass
 
     # for pos in pos_list:
     #     q = kin.inverse_kinematics(pos)

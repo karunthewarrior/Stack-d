@@ -71,8 +71,8 @@ def inverse_kinematics(target_pose,max_iter=1000,offset=True):
         final_pos,_ = forward_kinematics(q)
 
         dx = target_pose - final_pos["joint_4"][:3]
-    q[3] = np.pi/2 - final_pos["joint_4"][4] 
-
+    q[3] = np.pi/2 - final_pos["joint_4"][4]
+    q[4] = -q[0]
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
     if (np.all(abs(q) >= 0) and np.all(abs(q) <= np.pi/2)):

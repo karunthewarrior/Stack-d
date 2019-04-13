@@ -253,6 +253,10 @@ bool PositionControl::initCamera()
     dxl_wb_camera_->itemWrite(dxl_id_camera_[index], "Drive_Mode", 0);
   }
 
+  //Setting drive mode for tilt
+  
+  // dxl_wb_camera_->itemWrite(dxl_id_camera_[1], "Drive_Mode", 1);
+
   printf("-----------------------------------------------------------------------\n");
   printf("  LoCoBot Pan-Tilt Camera           \n");
   printf("-----------------------------------------------------------------------\n");

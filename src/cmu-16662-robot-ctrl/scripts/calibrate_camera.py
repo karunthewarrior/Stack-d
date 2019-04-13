@@ -103,18 +103,18 @@ if __name__ == "__main__":
     #set up node and classes for calibration
     rospy.init_node("camera_calib", anonymous=True)
     cam = camera_calib()
-    controller = controller.ArmController()
+    arm_controller = controller.ArmController()
     tilt_controller = controller.CamController('/tilt/state','/tilt/command')
     pan_controller = controller.CamController('/pan/state','/pan/command')
     rospy.sleep(2)
 
-    tilt_controller.set_cam_state(np.deg2rad(20))
-        while(not tilt_controller.has_converged()):
-            pass
+    tilt_controller.set_cam_state(np.deg2rad(-20))
+    while(not tilt_controller.has_converged()):
+        pass
 
     pan_controller.set_cam_state(np.deg2rad(0))
-        while(not pan_controller.has_converged()):
-            pass
+    while(not pan_controller.has_converged()):
+        pass
 
     #create list of target joints for calibration and loop through them
     target_joints = np.deg2rad([[0,-20,20,-70,0],[0,-20,20,-80,0],[10,-20,30,-80,0],[-20,-20,30,-80,0],[-20,20,30,-80,0],[20,20,20,-80,0],[20,20,0,-70,0],[20,15,0,-70,0],[20,20,0,-80,0],[30,10,0,-50,0],[30,10,-20,-50,0],[0,10,-20,-50,0],[0,10,-10,-50,0],[-20,20,30,-80,0]])
@@ -122,8 +122,8 @@ if __name__ == "__main__":
     arm_H_list = []
     cam_H_list = []
     for joint in target_joints:
-        controller.set_joint_state(joint)
-        while(not controller.has_converged()):
+        arm_controller.set_joint_state(joint)
+        while(not arm_controller.has_converged()):
             pass
         rospy.sleep(0.5)
 

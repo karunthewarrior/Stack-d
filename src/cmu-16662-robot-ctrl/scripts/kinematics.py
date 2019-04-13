@@ -14,13 +14,13 @@ def rot_H(R):
     return np.vstack([np.hstack([R,np.zeros(3).reshape(-1,1)]),[0,0,0,1]])
 
 def cam_to_world(pan,tilt):
-    orig_list = np.array([[-0.0154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.02, 0, -0.00425]])
-    axis_list = [[0,0,1],[0,1,0],[0,0,1]]
+    orig_list = np.array([[-0.0154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
+    axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
     angles = [pan,tilt,0]
+    print(angles)
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
-    cam_H = [all_H[0]]
-    for i in range(2,6):
-        cam_H.append(np.linalg.multi_dot(all_H[0:i]))
+    cam_H = np.linalg.multi_dot(all_H)
+    print(cam_H)
     H_cam_to_world = np.linalg.inv(cam_H[-1])
     return H_cam_to_world
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    H = cam_to_world(np.deg2rad(20),0)
+    H = cam_to_world(0,np.deg2rad(0))
     print(H)
     # pos_list = [[0.3,0,0.1]]
     # for pos in pos_list:

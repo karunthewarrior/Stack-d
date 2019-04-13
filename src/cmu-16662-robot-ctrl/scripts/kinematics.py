@@ -14,13 +14,13 @@ def rot_H(R):
     return np.vstack([np.hstack([R,np.zeros(3).reshape(-1,1)]),[0,0,0,1]])
 
 def cam_to_world(pan,tilt):
-    orig_list = np.array([[-0.0154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
+    orig_list = np.array([[-0.1154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
     axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
     angles = [pan,tilt,0]
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
     cam_H = np.linalg.multi_dot(all_H)
     H_cam_to_world = np.linalg.inv(cam_H)
-    return H_cam_to_world
+    return cam_H
 
 
 def forward_kinematics(angles):
@@ -53,7 +53,7 @@ def jacobian(fk_list):
 
 def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
     q = np.ones((5,1)) * np.pi/4
-    gripper_offset = np.array([0, 0, 0.193])
+    gripper_offset = np.array([0, 0.02, 0.233])
     # print(target_pose,"PRE KARUN")
     if offset:
         target_pose = target_pose + gripper_offset
@@ -104,12 +104,12 @@ if __name__ == "__main__":
     # link_pose,fk_list = forward_kinematics(angles)
     # jac = jacobian(fk_list)
     # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    H = cam_to_world(0,np.deg2rad(0))
-    print(H)
-    # pos_list = [[0.3,0,0.1]]
-    # for pos in pos_list:
-    #     q = inverse_kinematics(pos)
-    #     print(q,"WQEQWE")
+    # H = cam_to_world(0,np.deg2rad(0))
+    # print(H)
+    pos_list = [[0.3,0.02,0.4]]
+    for pos in pos_list:
+        q = inverse_kinematics(pos)
+        print(q,"WQEQWE")
     #     print("FK",forward_kinematics(q)[0]["joint_4"])
     #     if q !=None:
     #         print(np.rad2deg(q))

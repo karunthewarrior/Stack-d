@@ -5,8 +5,6 @@ import rospy
 from sensor_msgs.msg import JointState
 import kinematics as kin
 from std_msgs.msg import Empty,Float64
-import pickle
-
 
 class ArmController():
     def __init__(self):
@@ -21,8 +19,6 @@ class ArmController():
         self.close_pub = rospy.Publisher(self.gripper_close_topic,Empty, queue_size=1)
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         self.history = []
-        self.goal = []
-        self.state = []
 
     def set_joint_state(self,joint_target):
         self.joint_target = joint_target
@@ -40,22 +36,18 @@ class ArmController():
     def open(self):
         empty_msg = Empty()
         self.open_pub.publish(empty_msg)
-        rospy.sleep(0.5)
 
     def close(self):
         empty_msg = Empty()
         self.close_pub.publish(empty_msg)   
-        rospy.sleep(0.5)
 
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
         self.joint_state = np.array(joint_state.position)[0:5]
-        self.goal.append(self.joint_target)
-        self.state.append(self.joint_state)
 
     def has_converged(self):
         converged = False
-        if(np.all(abs(self.joint_state[:5]-self.joint_target[:5]) < 0.05)):
+        if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 0.5:
@@ -104,15 +96,14 @@ if __name__ == "__main__":
     rospy.init_node('controller_test', anonymous=True)
     arm_controller = ArmController()
     tilt_controller = CamController('/tilt/state','/tilt/command')
-    pan_controller = CamController('/pan/state','/pan/command')
+    pan_controllelr = CamController('/pan/state','/pan/command')
     target_pan = np.deg2rad([0,20,-20,0])
     target_tilt = np.deg2rad([0,20,-20,0])
     rospy.sleep(2)
     # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
-    # pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
-    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03],[0.25,0.25,-0.03]]
-    
+    pos_list = [[ 0.25553596,  0.14467942, -0.08592942]]
+    # pos_list = [[]] 
     # for tilt in target_tilt:
     #     tilt_controller.set_cam_state(tilt)
     #     while(not tilt_controller.has_converged()):
@@ -132,14 +123,13 @@ if __name__ == "__main__":
             exit()
     rospy.sleep(2)
 
+
     # print(target_joints)
-    # arm_controller.home_arm()
-    # arm_controller.open()
+    arm_controller.home_arm()
+    arm_controller.open()
     for joint in target_joints:
         arm_controller.set_joint_state(joint)
         while(not arm_controller.has_converged()):
             pass
-    # arm_controller.close()
-    arm_controller.home_arm()
-    pickle.dump(arm_controller.goal,open('goal_states.p','wb'))
-    pickle.dump(arm_controller.state,open('joint_states.p','wb'))
+    arm_controller.close()
+    # controller.home_arm()

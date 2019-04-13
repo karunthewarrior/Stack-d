@@ -29,9 +29,14 @@ class tag_estimator:
 
     def get_point(self,tag):
         try:
-            ar_position_obj = tag.markers[0].pose.pose.position
-            rospy.loginfo(ar_position_obj)
-            self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+            for marker in tag.markers:
+                ar_position_obj = marker.pose.pose.position
+                if marker.id == 2:
+                    self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+                elif marker.id == 4:
+                    self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+            # rospy.loginfo(ar_position_obj)
+            # self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
         # self.position_camera = np.array([ar_position_obj.z,-ar_position_obj.x,ar_position_obj.y,1])
         except:
             # rospy.loginfo("No detection")
@@ -57,7 +62,7 @@ if __name__ =="__main__":
     tilt_controller = ac.CamController('/tilt/state','/tilt/command')
     pan_controller = ac.CamController('/pan/state','/pan/command')
     rospy.sleep(1)
-    pan_controller.set_cam_state(np.deg2rad(0))
+    pan_controller.set_cam_state(np.deg2rad(25))
     while(not pan_controller.has_converged()):
         pass
     tilt_controller.set_cam_state(np.deg2rad(-40))
@@ -67,9 +72,11 @@ if __name__ =="__main__":
 
     target_joints = []
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
-    point = np.dot(H_c2w,estimator.position_camera)
+    point1 = np.dot(H_c2w,estimator.p1)
+    point2 = np.dot(H_c2w,estimator.p2)
     # rospy.loginfo(estimator.position_camera)
-    pos_list = [point[:3]+np.array([0,0,0.05]),point[:3]]
+    pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
+    grip = [False,True,True,True,False,False]
     rospy.loginfo(pos_list)
     for pos in pos_list:
         q = kin.inverse_kinematics(pos)
@@ -82,11 +89,15 @@ if __name__ =="__main__":
 
     arm_controller.home_arm()
     arm_controller.open()
-    for joint in target_joints:
+    for joint,g in zip(target_joints,grip):
         arm_controller.set_joint_state(joint)
         while(not arm_controller.has_converged()):
             pass
-    arm_controller.close()
+        if g == True:
+            arm_controller.close()
+        else:
+            arm_controller.open()
+    # arm_controller.close()
     rospy.sleep(0.5)
     arm_controller.home_arm()
     # while(not rospy.is_shutdown()):

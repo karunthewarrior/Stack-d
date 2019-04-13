@@ -19,6 +19,7 @@ class ArmController():
         self.close_pub = rospy.Publisher(self.gripper_close_topic,Empty, queue_size=1)
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         self.history = []
+        rospy.sleep(0.5)
 
     def set_joint_state(self,joint_target):
         self.joint_target = joint_target
@@ -36,10 +37,12 @@ class ArmController():
     def open(self):
         empty_msg = Empty()
         self.open_pub.publish(empty_msg)
+        rospy.sleep(0.5)
 
     def close(self):
         empty_msg = Empty()
         self.close_pub.publish(empty_msg)   
+        rospy.sleep(0.5)
 
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
@@ -64,6 +67,7 @@ class CamController():
         self.pub = rospy.Publisher(self.cam_goal_topic,Float64, queue_size=1)
         self.sub = rospy.Subscriber(self.cam_state_topic,Float64,self.get_cam_state)
         self.history = []
+        rospy.sleep(0.5)
 
     def set_cam_state(self,cam_target):
         self.cam_target = cam_target
@@ -99,7 +103,7 @@ if __name__ == "__main__":
     pan_controllelr = CamController('/pan/state','/pan/command')
     target_pan = np.deg2rad([0,20,-20,0])
     target_tilt = np.deg2rad([0,20,-20,0])
-    rospy.sleep(2)
+    # rospy.sleep(2)
     # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
     pos_list = [[ 0.25553596,  0.14467942, -0.08592942]]

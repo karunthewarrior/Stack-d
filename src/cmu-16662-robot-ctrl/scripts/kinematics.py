@@ -17,11 +17,9 @@ def cam_to_world(pan,tilt):
     orig_list = np.array([[-0.0154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
     axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
     angles = [pan,tilt,0]
-    print(angles)
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
     cam_H = np.linalg.multi_dot(all_H)
-    print(cam_H)
-    H_cam_to_world = np.linalg.inv(cam_H[-1])
+    H_cam_to_world = np.linalg.inv(cam_H)
     return H_cam_to_world
 
 

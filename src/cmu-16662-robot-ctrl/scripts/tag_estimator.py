@@ -28,13 +28,16 @@ class tag_estimator:
         self.tilt = tilt.data
 
     def get_point(self,tag):
+        self.p = []
         try:
             for marker in tag.markers:
                 ar_position_obj = marker.pose.pose.position
-                if marker.id == 2:
-                    self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-                elif marker.id == 4:
-                    self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+                p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])[:3]
+                self.p.append(p)
+                # if marker.id == 2:
+                #     self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+                # elif marker.id == 4:
+                #     self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
             # rospy.loginfo(ar_position_obj)
             # self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
         # self.position_camera = np.array([ar_position_obj.z,-ar_position_obj.x,ar_position_obj.y,1])
@@ -53,6 +56,16 @@ class tag_estimator:
         rospy.loginfo(pub_data)
         self.pub.publish(pub_data)
 
+def make_trajectory(s,d):
+    p_list = [s[:3]+np.array([0,0,0.05]),
+                s[:3],
+                s[:3]+np.array([0,0,0.05]),
+                d[:3]+np.array([0,0,0.05]),
+                d[:3],
+                d[:3]+np.array([0,0,0.05])]
+
+def make_destination(center):
+    dist = 0.1
 
 if __name__ =="__main__":
     rospy.init_node('marker_publisher', anonymous=True)
@@ -75,7 +88,9 @@ if __name__ =="__main__":
     point1 = np.dot(H_c2w,estimator.p1)
     point2 = np.dot(H_c2w,estimator.p2)
     # rospy.loginfo(estimator.position_camera)
-    pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
+    # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
+    
+
     grip = [False,True,True,True,False,False]
     rospy.loginfo(pos_list)
     for pos in pos_list:

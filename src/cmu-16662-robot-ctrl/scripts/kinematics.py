@@ -1,28 +1,64 @@
 import numpy as np
 import transforms3d as tf
 
+"""
+Computes the homogenous transformation
+Input: orig - Relative translation from current frame to target frame
+       axis - Axis about which to rotate
+       angle - Angle of rotation about axis
+Output: H - Homogenous transformation from current frame to target frame 
+"""
 def get_H(orig,axis,angle):
     orig = np.vstack([np.hstack([np.eye(3),np.array(orig).reshape(-1,1)]),[0,0,0,1]])
     axis = np.vstack([np.hstack([tf.axangles.axangle2mat(axis, angle),np.array([0, 0, 0]).reshape(-1,1)]),[0,0,0,1]])
     H = np.dot(orig,axis)
     return H 
 
+"""
+Computes the homogenous transformation for pure translation
+Input: trans - Relative translation from current frame to target frame
+Output: Homogenous transformation from current frame to target frame 
+"""
 def trans_H(trans):
     return np.vstack([np.hstack([np.eye(3),np.array(trans).reshape(-1,1)]),[0,0,0,1]])
 
+"""
+Computes the homogenous transformation for pure rotation
+Input: R - Rotation matrix from current frame to target
+Output: Homogenous transformation from current frame to target frame 
+"""
 def rot_H(R):
     return np.vstack([np.hstack([R,np.zeros(3).reshape(-1,1)]),[0,0,0,1]])
 
+"""
+Computes the homogenous transformation from the camera frame to the world frame (arm_base_link_joint)
+Input: pan - pan motor angle
+       tilt - tilt motor angle
+Output: H_cam_to_world - Homogenous transformation from camera frame to world frame 
+"""
 def cam_to_world(pan,tilt):
+    #Hardcoding the translations between the joints
     orig_list = np.array([[-0.0154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
-    axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
+    #Hardcoding the axis of rotations of the joints
+    axis_list = [[0,0,1],[0,-1,0],[0,0,1]] #Second axis is set to -1 since our setup has negative joint orientation to turn along the y-axis
+
+    #Last angle (0) corresponds to a fixed joint
     angles = [pan,tilt,0]
+
+    #Finding the relative transformation between each frame
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
+
+
     cam_H = np.linalg.multi_dot(all_H)
     H_cam_to_world = np.linalg.inv(cam_H)
     return H_cam_to_world
 
-
+"""
+Computes forward kinematics of the arm
+Input: angles - list of 
+       tilt - tilt motor angle
+Output: H_cam_to_world - Homogenous transformation from camera frame to world frame 
+"""
 def forward_kinematics(angles):
     orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.193, 0, 0]])
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]]

@@ -90,11 +90,9 @@ if __name__ =="__main__":
     pan_controller = ac.CamController('/pan/state','/pan/command')
     # rospy.sleep(1)
     pan_controller.set_cam_state(np.deg2rad(0))
-    while(not pan_controller.has_converged()):
-        pass
+
     tilt_controller.set_cam_state(np.deg2rad(-40))
-    while(not tilt_controller.has_converged()):
-        pass
+
     rospy.sleep(3)
 
     target_joints = []

@@ -28,12 +28,16 @@ class tag_estimator:
         self.tilt = tilt.data
 
     def get_point(self,tag):
-        self.p = []
         try:
-            for marker in tag.markers:
-                ar_position_obj = marker.pose.pose.position
-                p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])[:3]
-                self.p.append(p)
+            # rospy.loginfo(len(tag.markers))
+            if len(tag.markers) ==4:
+                # rospy.loginfo("GOT IT")
+                self.p = []
+                for marker in tag.markers:
+                    ar_position_obj = marker.pose.pose.position
+                    p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+                    self.p.append(p)
+
                 # if marker.id == 2:
                 #     self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
                 # elif marker.id == 4:
@@ -57,15 +61,25 @@ class tag_estimator:
         self.pub.publish(pub_data)
 
 def make_trajectory(s,d):
-    p_list = [s[:3]+np.array([0,0,0.05]),
+    p_list = [s[:3]+np.array([0,0,0.09]),
                 s[:3],
-                s[:3]+np.array([0,0,0.05]),
-                d[:3]+np.array([0,0,0.05]),
+                s[:3]+np.array([0,0,0.09]),
+                d[:3]+np.array([0,0,0.09]),
                 d[:3],
-                d[:3]+np.array([0,0,0.05])]
+                d[:3]+np.array([0,0,0.09])]
+    return p_list
 
-def make_destination(center):
-    dist = 0.1
+def make_destination(center,levels):
+    dist_x, dist_y = 0.06,0.06
+    d_list = []
+    for l in range(levels):
+        d = np.array([[0,-dist_y/2,(l-1)*0.02],
+                    [0,dist_y/2,(l-1)*0.02],
+                    [-dist_x/2,0,l*0.02],
+                    [dist_x/2,0,l*0.02]]) + center
+        d_list.append(d)
+    d = np.vstack(d_list)
+    return d
 
 if __name__ =="__main__":
     rospy.init_node('marker_publisher', anonymous=True)
@@ -75,7 +89,7 @@ if __name__ =="__main__":
     tilt_controller = ac.CamController('/tilt/state','/tilt/command')
     pan_controller = ac.CamController('/pan/state','/pan/command')
     rospy.sleep(1)
-    pan_controller.set_cam_state(np.deg2rad(25))
+    pan_controller.set_cam_state(np.deg2rad(0))
     while(not pan_controller.has_converged()):
         pass
     tilt_controller.set_cam_state(np.deg2rad(-40))
@@ -85,16 +99,27 @@ if __name__ =="__main__":
 
     target_joints = []
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
-    point1 = np.dot(H_c2w,estimator.p1)
-    point2 = np.dot(H_c2w,estimator.p2)
+    rospy.loginfo(len(estimator.p))
+    if len(estimator.p) == 4:
+        pw = [np.dot(H_c2w,p) for p in estimator.p]
+        destination = make_destination(np.array([0.20,0.13,-0.09]),levels=2)
+        pos_list = []
+        rospy.loginfo(destination)
+        for s,d in zip(pw,destination):
+            # rospy.loginfo(make_trajectory(s,d))
+            pos_list.extend(make_trajectory(s,d))
+        rospy.loginfo(pos_list)
+    else:
+        pos_list = []
     # rospy.loginfo(estimator.position_camera)
     # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
     
 
-    grip = [False,True,True,True,False,False]
+    grip = [False,True,True,True,False,False] * len(pw)
+    yaw = [0]*12 + [0]*3 + [np.pi/2]*3 + [0]*3 + [np.pi/2]*3   
     rospy.loginfo(pos_list)
-    for pos in pos_list:
-        q = kin.inverse_kinematics(pos)
+    for pos,y in zip(pos_list,yaw):
+        q = kin.inverse_kinematics(pos,y)
         print(kin.forward_kinematics(q)[0]["joint_4"])
         if q!=None:
             target_joints.append(q)
@@ -115,5 +140,3 @@ if __name__ =="__main__":
     # arm_controller.close()
     rospy.sleep(0.5)
     arm_controller.home_arm()
-    # while(not rospy.is_shutdown()):
-        # estimator.set_point()

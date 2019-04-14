@@ -51,7 +51,7 @@ def cam_to_world(pan,tilt):
 
     cam_H = np.linalg.multi_dot(all_H)
     H_cam_to_world = np.linalg.inv(cam_H)
-    return H_cam_to_world
+    return cam_H
 
 """
 Computes forward kinematics of the arm
@@ -82,20 +82,16 @@ def jacobian(fk_list):
     for H,axis in zip(fk_list[:3],axis_list[:3]):  #only first three joints
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
-        # jac_column = np.vstack([np.cross(a,p).reshape(-1,1),a.reshape(-1,1)])
         jac_column = np.cross(a,p).reshape(-1,1)
         jac.append(jac_column)
     return np.hstack(jac)
 
-def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
+def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
     q = np.ones((5,1)) * np.pi/4
-    gripper_offset = np.array([0, 0, 0.193])
-    # print(target_pose,"PRE KARUN")
+    gripper_offset = np.array([0, 0.015, 0.238])
     if offset:
         target_pose = target_pose + gripper_offset
-    # print(target_pose,"POSE KaruN")
     q[0] = -np.pi/4
-    # q[1] = np.pi/2
     q[2] = np.pi/5
     q[3] = 0
     q[4] = 0
@@ -114,13 +110,12 @@ def inverse_kinematics(target_pose,open_grip=True,max_iter=1000,offset=True):
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos["joint_4"][:3]
     q[3] = np.pi/2 - final_pos["joint_4"][4] 
-    q[4] = -q[0]
+    q[4] = -q[0] + yaw
     q = np.array([map_angle(a) for a in q])
     print(q,"Q",np.rad2deg(q))
     if (np.all(abs(q[:3]) >= 0) and np.all(abs(q[:3]) <= np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
-        # print(q)
         return None
     
 def map_angle(a):
@@ -136,17 +131,6 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    # angles= [-0.9501,0.8786,0.5130,-1.4157,-0.1997]
-    # link_pose,fk_list = forward_kinematics(angles)
-    # jac = jacobian(fk_list)
-    # q = inverse_kinematics([0.16557369, -0.23141237,  0.00692751])
-    H = cam_to_world(0,np.deg2rad(0))
-    print(H)
-    # pos_list = [[0.3,0,0.1]]
-    # for pos in pos_list:
-    #     q = inverse_kinematics(pos)
-    #     print(q,"WQEQWE")
-    #     print("FK",forward_kinematics(q)[0]["joint_4"])
-    #     if q !=None:
-    #         print(np.rad2deg(q))
-# print(forward_kinematics(q)[0][-1,0:3])
+    pos_list = [[0.3,0.02,0.4]]
+    for pos in pos_list:
+        q = inverse_kinematics(pos,0)

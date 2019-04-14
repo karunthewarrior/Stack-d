@@ -4,8 +4,6 @@ import rospy
 from sensor_msgs.msg import JointState
 import kinematics as kin
 from std_msgs.msg import Empty,Float64
-import pickle
-
 
 class ArmController():
     def __init__(self):
@@ -23,11 +21,9 @@ class ArmController():
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         
         self.history = []
-        
         # Used to plot response of the controller
         self.goal = []
         self.state = []
-
         #Pausing so that the subscriber callback initializes the joint_state variable
         rospy.sleep(1)
 
@@ -65,10 +61,10 @@ class ArmController():
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
         self.joint_state = np.array(joint_state.position)[0:5]
-
         #Bookkeeping to plot the controller response
         self.goal.append(self.joint_target)
         self.state.append(self.joint_state)
+
 
 """
 Checks if the joint angles have converged to the target
@@ -76,7 +72,7 @@ Output: Boolean - True if converged
 """
     def has_converged(self):
         converged = False
-        if(np.all(abs(self.joint_state[:5]-self.joint_target[:5]) < 0.05)):
+        if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
             self.history.append(self.time)
             if (self.time - self.history[0]).to_sec() > 0.5:
                 converged = True
@@ -94,6 +90,7 @@ class CamController():
         self.pub = rospy.Publisher(self.cam_goal_topic,Float64, queue_size=1)
         self.sub = rospy.Subscriber(self.cam_state_topic,Float64,self.get_cam_state)
         self.history = []
+        rospy.sleep(0.5)
 
         rospy.sleep(0.5)
 
@@ -153,3 +150,4 @@ if __name__ == "__main__":
     arm_controller.home_arm()
     # pickle.dump(arm_controller.goal,open('goal_states.p','wb'))
     # pickle.dump(arm_controller.state,open('joint_states.p','wb'))
+

@@ -34,7 +34,7 @@ def rot_H(R):
 Computes the homogenous transformation from the camera frame to the world frame (arm_base_link_joint)
 Input: pan - pan motor angle
        tilt - tilt motor angle
-Output: H_cam_to_world - Homogenous transformation from camera frame to world frame 
+Output: cam_H - Homogenous transformation from camera frame to world frame 
 """
 def cam_to_world(pan,tilt):
     #Hardcoding the translations between the joints
@@ -47,35 +47,47 @@ def cam_to_world(pan,tilt):
 
     #Finding the relative transformation between each frame
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
-
-
+    #Multiplying each relative transformation to get the final transformation
     cam_H = np.linalg.multi_dot(all_H)
-    H_cam_to_world = np.linalg.inv(cam_H)
     return cam_H
 
 """
 Computes forward kinematics of the arm
-Input: angles - list of 
-       tilt - tilt motor angle
-Output: H_cam_to_world - Homogenous transformation from camera frame to world frame 
+Input: angles - list of the 5 joint angles of the arm 
+Output: pose - Dictionary containing the 6DOF pose of each joint
+        fk_list - List of homogenous transformation matrices that take you from the world frame to the frame at each joint in sequence.
 """
 def forward_kinematics(angles):
+    #Hardcoding the translations between the joints
     orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.193, 0, 0]])
+    #Hardcoding the axis of rotations of the joints
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]]
  
+    #Finding the relative transformation between each frame
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
 
+    #Multiplying the relative transformation to get the transformation until the correnponding joint angle
     fk_list = [all_H[0]]
     for i in range(2,6):
         fk_list.append(np.linalg.multi_dot(all_H[0:i]))
     
+    """
+    Extracting Pose from homogenous matrix and storing them in a dictionary. 
+    Each value is accesed using the name of the joint as the Key.
+    """
     centroids = np.vstack([H[:3,-1] for H in fk_list]) 
     orientation = np.vstack([tf.euler.mat2euler(x[:3,:3],'rxyz') for x in fk_list])
-
     pose_mat = np.hstack([centroids,orientation])
     pose = {"joint_1":pose_mat[0],"joint_2":pose_mat[1],"joint_3":pose_mat[2],"joint_4":pose_mat[3],"gripper":pose_mat[4]}
+
     return pose,fk_list
 
+"""
+Computes the jacobian corresponding to the 3D position of a point in task space (in our case position of joint_1 to joint_3).
+Since we are only concerned with the position of the third joint, our jacobian is of shape 3x3.
+Input: fk_list - List of homogenous transformations for each joint computed by the forward kinematics
+Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D postion of each joint.
+"""
 def jacobian(fk_list):
     axis_list = np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]])
     jac = []
@@ -86,38 +98,58 @@ def jacobian(fk_list):
         jac.append(jac_column)
     return np.hstack(jac)
 
+"""
+Computes the jacobian corresponding to the 3D position of a point in task space (in our case position of joint_1 to joint_4).
+Since we are only concerned with the position of the third joint, our jacobian is of shape 3x3.
+Input: fk_list - List of homogenous transformations for each joint computed by the forward kinematics
+Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D postion of each joint.
+"""
 def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
-    q = np.ones((5,1)) * np.pi/4
+    #Computing gripper offset to account for error in end effector position
     gripper_offset = np.array([0, 0.015, 0.238])
     if offset:
         target_pose = target_pose + gripper_offset
+    #Initializing joint angles 
+    q = np.zeros((5,1))
     q[0] = -np.pi/4
+    q[1] = np.pi/4
     q[2] = np.pi/5
-    q[3] = 0
-    q[4] = 0
+
+    #TODO initialze x to the position of joint_4 given the initial joint configuration. Currently zero works so not changing. 
+    #The motivation to change it would be so that we can get straight line paths from initial to target position.
     x = np.zeros(3)
     dx = target_pose - x
+    
     i = 0
     while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
-            print("timeout")
+            print("Timeout. No solution.")
             return None
         i +=1
+        #Computing the pose of the joints and the jacobian
         _,fk_list = forward_kinematics(q)
         jac = jacobian(fk_list)
+        #Using the pseudoinverse to find dq
         dq = np.dot(np.linalg.pinv(jac),dx).reshape(-1,1)
-        q[:3] = q[:3] + dq 
+        #Updating the joint angles
+        q[:3] = q[:3] + dq
+        #Recomputing error in task space position of the 3D point (joint_4)
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos["joint_4"][:3]
+    #Adding the offset to align the gripper parallel to the ground
     q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    #Adding the offset to account for the input yaw
     q[4] = -q[0] + yaw
+    #Mapping the angle to lie within -pi/2 to pi/2 
     q = np.array([map_angle(a) for a in q])
-    print(q,"Q",np.rad2deg(q))
+    #Return the solution if it is within the joint limits
     if (np.all(abs(q[:3]) >= 0) and np.all(abs(q[:3]) <= np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
+        print("No solution within the joint limits")
         return None
-    
+
+#Helper function to map an angle in the fourth quadrant to a negative value
 def map_angle(a):
     if a >=0:
         a = a % (2*np.pi)
@@ -131,6 +163,6 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    pos_list = [[0.3,0.02,0.4]]
+    pos_list = [[0.3,0.02,0.1]]
     for pos in pos_list:
         q = inverse_kinematics(pos,0)

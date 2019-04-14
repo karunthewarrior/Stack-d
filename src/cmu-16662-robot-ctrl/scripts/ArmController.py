@@ -65,11 +65,6 @@ class ArmController():
         self.goal.append(self.joint_target)
         self.state.append(self.joint_state)
 
-
-"""
-Checks if the joint angles have converged to the target
-Output: Boolean - True if converged
-"""
     def has_converged(self):
         converged = False
         if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
@@ -90,9 +85,7 @@ class CamController():
         self.pub = rospy.Publisher(self.cam_goal_topic,Float64, queue_size=1)
         self.sub = rospy.Subscriber(self.cam_state_topic,Float64,self.get_cam_state)
         self.history = []
-        rospy.sleep(0.5)
-
-        rospy.sleep(0.5)
+        rospy.sleep(1)
 
 #Publisher to set the target angle
     def set_cam_state(self,cam_target):
@@ -132,11 +125,11 @@ if __name__ == "__main__":
     pan_controller = CamController('/pan/state','/pan/command')
 
     target_joints = []
-    # pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
-    pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03],[0.25,0.25,-0.03]]
+    pos_list = [[0.3,0.1,0],[0.3,0.15,0],[0.3,-0.1,0]]
+    # pos_list = [[0.3,0,0.1],[0.3,0,-0.055],[0.3,0,-0.055],[0.3,0,0.1],[0.25,0.25,0.1],[0.25,0.25,0],[0.25,0.25,-0.03],[0.25,0.25,-0.03]]
     
     for pos in pos_list:
-        q = kin.inverse_kinematics(pos)
+        q = kin.inverse_kinematics(pos,0)
         print(kin.forward_kinematics(q)[0]["joint_4"])
         if q!=None:
             target_joints.append(q)

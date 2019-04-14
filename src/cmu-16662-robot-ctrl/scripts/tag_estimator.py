@@ -88,7 +88,7 @@ if __name__ =="__main__":
 
     tilt_controller = ac.CamController('/tilt/state','/tilt/command')
     pan_controller = ac.CamController('/pan/state','/pan/command')
-    rospy.sleep(1)
+    # rospy.sleep(1)
     pan_controller.set_cam_state(np.deg2rad(0))
     while(not pan_controller.has_converged()):
         pass
@@ -131,8 +131,6 @@ if __name__ =="__main__":
     arm_controller.open()
     for joint,g in zip(target_joints,grip):
         arm_controller.set_joint_state(joint)
-        while(not arm_controller.has_converged()):
-            pass
         if g == True:
             arm_controller.close()
         else:

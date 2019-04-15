@@ -8,6 +8,7 @@ from std_msgs.msg import Empty,Float64
 
 class ArmController():
     def __init__(self):
+        # Topics to control arm joints
         self.goal_topic = '/goal_dynamixel_position'
         self.joint_state_topic = '/joint_states'
         self.gripper_open_topic = '/gripper/open'
@@ -19,14 +20,18 @@ class ArmController():
         self.close_pub = rospy.Publisher(self.gripper_close_topic,Empty, queue_size=1)
         self.sub = rospy.Subscriber(self.joint_state_topic,JointState,self.get_joint_state)
         self.history = []
+
+        #Pausing so that the subscriber callback initializes the joint_state variable
         rospy.sleep(0.5)
 
+#Publisher to set the target joint angles
     def set_joint_state(self,joint_target):
         self.joint_target = joint_target
         joint_state = JointState()
         joint_state.position = tuple(joint_target)
         self.pub.publish(joint_state)
 
+#Moves the arm to the home configuration
     def home_arm(self):
         rospy.loginfo('Going to arm home pose')
         self.set_joint_state(np.zeros(5))
@@ -34,16 +39,19 @@ class ArmController():
         while(not self.has_converged()):
             pass
 
+#Opens the gripper when called
     def open(self):
         empty_msg = Empty()
         self.open_pub.publish(empty_msg)
         rospy.sleep(0.5)
 
+#Closes the gripper when called
     def close(self):
         empty_msg = Empty()
         self.close_pub.publish(empty_msg)   
         rospy.sleep(0.5)
 
+#Subscriber callback to get current joint states
     def get_joint_state(self,joint_state):
         self.time = joint_state.header.stamp
         self.joint_state = np.array(joint_state.position)[0:5]
@@ -61,6 +69,7 @@ class ArmController():
 
 class CamController():
     def __init__(self,cam_state_topic,cam_goal_topic):
+        #Topics to control cam joint
         self.cam_goal_topic = cam_goal_topic
         self.cam_state_topic = cam_state_topic
         self.cam_target = 0
@@ -69,22 +78,26 @@ class CamController():
         self.history = []
         rospy.sleep(0.5)
 
+#Publisher to set the target angle
     def set_cam_state(self,cam_target):
         self.cam_target = cam_target
         cam_state = Float64()
         cam_state.data = cam_target
         self.pub.publish(cam_state)
 
+#Sets the cam angle to zero
     def home_arm(self):
         self.set_joint_state(0)
         # rospy.sleep(5)
         while(not controller.has_converged()):
             pass
 
+#Subscriber callback to get the current cam angle
     def get_cam_state(self,cam_state):
         self.time = rospy.get_rostime()
         self.cam_state = cam_state.data
 
+#Checks if the angle has converged to the target
     def has_converged(self):
         converged = False
         if(abs(self.cam_state-self.cam_target) < 0.1):
@@ -96,7 +109,8 @@ class CamController():
             self.history = []
         return converged
 
-if __name__ == "__main__":  
+if __name__ == "__main__":
+    #Initializing rospy and initializing the arm and camera objects
     rospy.init_node('controller_test', anonymous=True)
     arm_controller = ArmController()
     tilt_controller = CamController('/tilt/state','/tilt/command')

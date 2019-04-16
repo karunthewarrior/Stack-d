@@ -39,7 +39,7 @@ Input: pan - pan motor angle
 Output: cam_H - Homogenous transformation from camera frame to world frame 
 """
 def cam_to_world(pan,tilt):
-    orig_list = np.array([[-0.1154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
+    orig_list = np.array([[-0.1154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.033, 0]])
     axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
     angles = [pan,tilt,0]
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
@@ -101,7 +101,7 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 """
 def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
     #Computing gripper offset to account for error in end effector position
-    gripper_offset = np.array([0, 0.015, 0.185])
+    gripper_offset = np.array([0, 0, 0.2])
     if offset:
         target_pose = target_pose + gripper_offset
     #Initializing joint angles

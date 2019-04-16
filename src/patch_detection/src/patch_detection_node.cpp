@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "sensor_msgs/Image.h"
-#include <opencv2/highgui.hpp>
+// #include <opencv2/highgui.hpp>
 // #include <iostream>
 
 int main(int argc,char **argv)

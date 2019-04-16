@@ -10,10 +10,10 @@ from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import scipy.ndimage
 from patch_detection.msg import detections
-from ssearch import selectsearch
+# from ssearch import selectsearch
 from std_msgs.msg import Float64MultiArray
 
 class block_color():
@@ -53,7 +53,7 @@ class block_color():
         masksilver = cv2.inRange(hsv_image, (0,0,0),(10,0,100))
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
-        list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = np.array(list_contours)
         # result = cv2.drawContours(result, contours, -1, (52, 198, 30))
         
@@ -77,8 +77,6 @@ class block_color():
             cv2.rectangle(image_used, (p_max[0], p_max[1]), (p_max[0] + p_max[2], p_max[1] + p_max[3]), (0, 255, 0), 2)
             cv2.putText(image_used,'Box',(p_max[0]+p_max[2]+10,p_max[1]+p_max[3]),0,1.0,(0,255,0))
             cv2.drawContours(image_used,[box],0,(0,0,255),2)
-            cv2.imshow("realsense_window", image_used)
-            cv2.waitKey(1)
         
             self.block_detect.detected = True
             self.block_detect.x = p_max[0]
@@ -87,6 +85,10 @@ class block_color():
             self.block_detect.h = p_max[3]
             self.im_coord[0] = np.average(box[:,0])
             self.im_coord[1] = np.average(box[:,1])
+            cv2.circle(image_used,(self.im_coord[0],self.im_coord[1]), 5, (0,0,255), -1)
+            cv2.imshow("realsense_window", image_used)
+            cv2.waitKey(1)
+
             # print(box)
 
             # print (p_max[0], p_max[1], p_max[2], p_max[3])
@@ -109,8 +111,9 @@ class block_color():
         f_y = 619.2664184570312
         u_0 = 324.06787109375
         v_0 = 246.47152709960938
+        window = 3
         if(self.flag_block == True):
-            self.z_center = cv_image[self.im_coord[1],self.im_coord[0]]
+            self.z_center = np.average(cv_image[self.im_coord[1]-window:self.im_coord[1]+window,self.im_coord[0]-window:self.im_coord[0]+window])
             print(self.z_center)
             self.x_center = (self.im_coord[0]-u_0)*self.z_center/f_x
             self.y_center = (self.im_coord[1]-v_0)*self.z_center/f_y

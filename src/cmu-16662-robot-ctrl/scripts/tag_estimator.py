@@ -5,10 +5,12 @@ import rospy
 import math
 import kinematics as kin
 import ArmController as ac
+import transforms3d as tf
 
 class tag_estimator:
     def __init__(self):
         self.camera_pose_topic = "/ar_pose_marker"
+        self.camera_pose_topic = "block_detection"
         self.position_camera = np.array([0,0,0,1])
         self.world_point_topic = "/marker_pos"
 
@@ -18,7 +20,8 @@ class tag_estimator:
         self.sub_pan = rospy.Subscriber(self.pan_state_topic,Float64,self.get_pan)
         self.sub_tilt = rospy.Subscriber(self.tilt_state_topic,Float64,self.get_tilt)
 
-        self.sub_tag = rospy.Subscriber(self.camera_pose_topic,AlvarMarkers,self.get_point)
+        # self.sub_tag = rospy.Subscriber(self.camera_pose_topic,AlvarMarkers,self.get_point)
+        self.sub_col = rospy.Subscriber(self.camera_pose_topic,Float64MultiArray,self.get_point)
         self.pub = rospy.Publisher(self.world_point_topic,Float64MultiArray, queue_size=1)
 
     def get_pan(self,pan):
@@ -27,29 +30,42 @@ class tag_estimator:
     def get_tilt(self,tilt):
         self.tilt = tilt.data
 
-    def get_point(self,tag):
-        try:
-            rospy.loginfo(len(tag.markers))
-            if len(tag.markers) ==2:
-                # rospy.loginfo("GOT IT")
-                self.p = []
-                for marker in tag.markers:
-                    ar_position_obj = marker.pose.pose.position
-                    p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-                    self.p.append(p)
+    # def get_point(self,tag):
+    #     try:
+    #         rospy.loginfo(len(tag.markers))
+    #         if len(tag.markers) ==2:
+    #             # rospy.loginfo("GOT IT")
+    #             self.p = []
+    #             for marker in tag.markers:
+    #                 ar_position_obj = marker.pose.pose.position
+    #                 p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+    #                 self.p.append(p)
 
-                # if marker.id == 2:
-                #     self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-                # elif marker.id == 4:
-                #     self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-            # rospy.loginfo(ar_position_obj)
-            # self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-        # self.position_camera = np.array([ar_position_obj.z,-ar_position_obj.x,ar_position_obj.y,1])
-        except:
-            # rospy.loginfo("No detection")
-            pass
-        # self.position_camera = np.array([0,0,0,0])
-        # self.set_point()
+    #             # if marker.id == 2:
+    #             #     self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+    #             # elif marker.id == 4:
+    #             #     self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+    #         # rospy.loginfo(ar_position_obj)
+    #         # self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
+    #     # self.position_camera = np.array([ar_position_obj.z,-ar_position_obj.x,ar_position_obj.y,1])
+    #     except:
+    #         # rospy.loginfo("No detection")
+    #         pass
+    #     # self.position_camera = np.array([0,0,0,0])
+    #     # self.set_point()
+
+    def get_point(self,pos):
+        p = [pos.data[0]/1000,pos.data[1]/1000,(pos.data[2]+5)/1000,1]
+        q = np.array([0.500, -0.500, 0.500, 0.500])
+        R = tf.quaternions.quat2mat(q)
+        H = kin.rot_H(R)
+        p_t = np.dot(H,p)
+        
+        p_end = [p_t[1],p_t[0],p_t[2],1]
+        # print(p_end,"point")
+        # print(np.dot(H,p),"HIASDHASD")
+        self.p = [p_end]
+
 
     def set_point(self):
         pub_data=Float64MultiArray()
@@ -100,13 +116,14 @@ if __name__ =="__main__":
     target_joints = []
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     rospy.loginfo(len(estimator.p))
-    if len(estimator.p) == 2:
+    if len(estimator.p) == 1:
         pw = [np.dot(H_c2w,p) for p in estimator.p]
+        print(pw,"point1")
         destination = make_destination(np.array([0.30,0.13,0]),levels=2)
         pos_list = []
         rospy.loginfo(destination)
         for s,d in zip(pw,destination):
-            # rospy.loginfo(make_trajectory(s,d))
+            # rospy.loginfo(make_trajectory(s,d))   
             pos_list.extend(make_trajectory(s,d))
         rospy.loginfo(pos_list)
     else:

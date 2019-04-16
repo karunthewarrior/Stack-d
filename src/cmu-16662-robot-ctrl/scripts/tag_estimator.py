@@ -29,8 +29,8 @@ class tag_estimator:
 
     def get_point(self,tag):
         try:
-            # rospy.loginfo(len(tag.markers))
-            if len(tag.markers) ==4:
+            rospy.loginfo(len(tag.markers))
+            if len(tag.markers) ==2:
                 # rospy.loginfo("GOT IT")
                 self.p = []
                 for marker in tag.markers:
@@ -100,9 +100,9 @@ if __name__ =="__main__":
     target_joints = []
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     rospy.loginfo(len(estimator.p))
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 2:
         pw = [np.dot(H_c2w,p) for p in estimator.p]
-        destination = make_destination(np.array([0.20,0.13,-0.09]),levels=2)
+        destination = make_destination(np.array([0.30,0.13,0]),levels=2)
         pos_list = []
         rospy.loginfo(destination)
         for s,d in zip(pw,destination):

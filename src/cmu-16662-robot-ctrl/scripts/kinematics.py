@@ -101,19 +101,18 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 """
 def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
     #Computing gripper offset to account for error in end effector position
-    gripper_offset = np.array([0, 0.015, 0.238])
+    gripper_offset = np.array([0, 0.015, 0.185])
     if offset:
         target_pose = target_pose + gripper_offset
     #Initializing joint angles
-    q = np.ones((5,1)) * np.pi/4
+    q = np.zeros((5,1))
     q[0] = -np.pi/4
+    q[1] = np.pi/4
     q[2] = np.pi/5
-    q[3] = 0
-    q[4] = 0
 
     #TODO initialze x to the position of joint_4 given the initial joint configuration. Currently zero works so not changing. 
     #The motivation to change it would be so that we can get straight line paths from initial to target position.
-    x = np.zeros(3)
+    x = np.zeros(3)    
     dx = target_pose - x
 
     i = 0
@@ -132,6 +131,7 @@ def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True)
         #Recomputing error in task space position of the 3D point (joint_4)
         final_pos,_ = forward_kinematics(q)
         dx = target_pose - final_pos["joint_4"][:3]
+    
     #Adding the offset to align the gripper parallel to the ground
     q[3] = np.pi/2 - final_pos["joint_4"][4] 
     #Adding the offset to account for the input yaw

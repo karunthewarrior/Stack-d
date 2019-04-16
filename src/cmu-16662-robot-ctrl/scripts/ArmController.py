@@ -120,7 +120,7 @@ if __name__ == "__main__":
     # rospy.sleep(2)
     # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
-    pos_list = [[ 0.25553596,  0.14467942, -0.08592942]]
+    pos_list = [[ 0.25553596,  0.14467942, 0]]
     # pos_list = [[]] 
     # for tilt in target_tilt:
     #     tilt_controller.set_cam_state(tilt)
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     #         pass
 
     for pos in pos_list:
-        q = kin.inverse_kinematics(pos)
+        q = kin.inverse_kinematics(pos,0)
         print(kin.forward_kinematics(q)[0]["joint_4"])
         if q!=None:
             target_joints.append(q)

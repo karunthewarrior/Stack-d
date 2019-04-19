@@ -101,7 +101,11 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 def jacobian(fk_list,full=False):
     axis_list = np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]])
     jac = []
-    for H,axis in zip(fk_list[:3],axis_list[:3]):  #only first three joints
+    if full:
+        ind = 5
+    else:
+        ind = 3
+    for H,axis in zip(fk_list[:ind],axis_list[:ind]):  #only first three joints
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
         jac_column = np.cross(a,p).reshape(-1,1)
@@ -175,6 +179,9 @@ def map_angle(a):
 if __name__ == "__main__":
     pos_list = [[0.3,0.02,0.1]]
     q = [0,0,0,0,0]
+    _,fk_list = forward_kinematics(q)
+    jac = jacobian(fk_list,full=True)
+    print(jac)
     for pos in pos_list:
         q = inverse_kinematics(pos,0)
         print(q)

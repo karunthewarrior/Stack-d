@@ -63,16 +63,22 @@ class block_color():
         box_list = []
         bound = np.array([0,0,0,0]).reshape(1,-1)
         for c in contours:
+            #Approximating contour shape
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
             area = (w*h)
 
+            #Bounding box supression
             candidate = np.array([x,y,x+w,y+h]).reshape(1,-1)
             difference = np.sum(np.abs(bound - candidate)**2,axis=-1)**(1./2)
             min_difference = np.min(difference)
+
             if(min_difference > 3):
                 bound = np.append(bound,candidate,0)
-                if(w > 70 and h > 70 and w<300 and h<300):
+                if(w > 50 and h > 50 and len(approx) ==4 ):
                     box = cv2.boxPoints(rect)
                     self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1])]))
                     box_list.append(np.int0(box))

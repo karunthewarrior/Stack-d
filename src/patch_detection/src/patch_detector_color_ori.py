@@ -49,9 +49,7 @@ def find_block(im):
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
         area = (w*h)
-        # if(x >p_max[0] and x+w< p_max[0]+p_max[2] and y > p_max[1] and y+h<p_max[1]+p_max[3] and area >area_patch):
-        #     p_patch = [x,y,w,h]
-        #     area_patch = area
+
         if(area>area_max and w > 30 and h > 30):
             area_max = area
             p_max = [x,y,w,h]

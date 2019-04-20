@@ -18,7 +18,7 @@ class webcam_node:
     def webcam_publisher(self):
         rospy.init_node('webcam_publisher', anonymous=True)
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(0)
         while not rospy.is_shutdown():
 
             ret, frame = cap.read()

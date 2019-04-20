@@ -148,16 +148,31 @@ bool PositionControl::initArm()
     dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Drive_Mode", 0);
   }
 
+
   //Turning gains for specific motors
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_I_Gain", 100);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_D_Gain", 0);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_P_Gain", 1800);
+
   for (int index = 1; index < 3; ++index)
   {
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 15);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 10);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 1000);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 100);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 0);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 1800);
   }
 
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_I_Gain", 20);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_D_Gain", 30);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_I_Gain", 80);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_D_Gain", 0);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_P_Gain", 1500);
+
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_I_Gain", 80);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_D_Gain", 0);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_P_Gain", 1600);
+
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_I_Gain", 50);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_D_Gain", 0);
+  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_P_Gain", 1200);
+
 
 
   //

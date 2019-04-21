@@ -56,7 +56,7 @@ def webcam_to_world(angles):
     #Hardcoding the axis of rotations of the joints
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0],[1,0,0],[1,0,0]]
     #Hardcoding the fixed joint angles
-    angles = angles + [0,0]
+    angles = np.hstack([angles,np.array([0,0])])
     #Finding the relative transformation between each frame
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
     webcam_H = np.linalg.multi_dot(all_H)

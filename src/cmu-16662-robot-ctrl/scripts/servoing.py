@@ -4,66 +4,59 @@ import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from pprint import pprint
+import ArmController as ac
+import kinematics as kin
+from std_msgs.msg import Float64MultiArray
 
-
-class Servoing_node():
+class Point_detection():
     def __init__(self):
-        self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("webcam",Image,self.callback)
-        self.x = 0.0
-        self.y = 0.0
-        params = cv2.SimpleBlobDetector_Params()
+        rospy.init_node("Point_detection", anonymous=True)
+        rospy.Subscriber("pixel_error",Float64MultiArray, self.get_error)
+        rospy.sleep(1)
+    
+    def get_error(self, error_pixel):
+        self.error_pixel = np.array(error_pixel.data).reshape(-1,1)
 
-        # Change thresholds
-        params.minThreshold = 0
-        params.maxThreshold = 400
-
-
-        # Filter by Area.
-        # params.filterByArea = True
-        # params.minArea = 50
-
-        # # Filter by Circularity
-        # params.filterByCircularity = True
-        # params.minCircularity = 0.1
-
-        # # Filter by Convexity
-        # params.filterByConvexity = True
-        # params.minConvexity = 0.87
-
-        # # Filter by Inertia
-        # params.filterByInertia = True
-        # params.minInertiaRatio = 0.01
-        self.detector = cv2.SimpleBlobDetector_create(params)
-
-    def callback(self,image):
-        im = self.bridge.imgmsg_to_cv2(image) 
-        height,width = im.shape[0:2]
-        # print("target:",width/2,height/2) 
-        keypoints = self.detector.detect(im)
-        
-        if len(keypoints) is not 0:
-            self.x,self.y = keypoints[0].pt
-        else:
-            print("no detection")
-        # print("x=",self.x,"y=",self.y)
-        error = np.abs(np.array([self.x-width/2-5,self.y-height/2]))
-        print(error)
-        im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-         
-        cv2.imshow("Keypoints", im_with_keypoints)
-        cv2.waitKey(1)
-
-
-    def getting_marker(self):
-        rospy.init_node("getting_marker", anonymous=True)
-        rospy.spin()
-
-
+def compute_joint_angles(error_pixel,angles):
+    q = np.array(angles).reshape(-1,1)
+    alpha = 1e-3
+    H = kin.webcam_to_world(angles)
+    error_world  = np.dot(H[:3,:3],error_pixel[:3])
+    final_pos,fk_list = kin.forward_kinematics(angles)
+    J = kin.jacobian(fk_list)
+    delta_q = alpha * np.dot(J.T,error_world)
+    print(final_pos,"before")
+    print(q,"before")
+    q[:3] = q[:3] + delta_q
+    print(q,"after")
+    final_pos,_ = kin.forward_kinematics(q)
+    # q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    # q[4] = -q[0]
+    print(final_pos,"before")
+    return q
 
 if __name__ == '__main__':
     try:
-        servoing = Servoing_node()
-        servoing.getting_marker()
+        servoing = Point_detection()
+        arm_controller = ac.ArmController()
+
+        pos = [0.2,0,-0.06]
+        q = kin.inverse_kinematics(pos,np.deg2rad(0))
+        # arm_controller.home_arm()
+        arm_controller.set_joint_state(q)
+        while(not arm_controller.has_converged()):
+            pass    
+        # print(compute_joint_angles(np.array([0,30,100,1]).reshape(-1,1),[0,np.deg2rad(45),np.deg2rad(20),np.deg2rad(30),0]))
+        while not rospy.is_shutdown():
+            angles = arm_controller.joint_state
+            q = compute_joint_angles(servoing.error_pixel,angles)
+            rospy.loginfo(q)
+            arm_controller.set_joint_state(q)
+            # while(not arm_controller.has_converged()):
+            #     print(q)
+            #     pass
+            if (np.all(np.abs(servoing.error_pixel<10))):
+                break 
+
     except rospy.ROSInterruptException:
         pass

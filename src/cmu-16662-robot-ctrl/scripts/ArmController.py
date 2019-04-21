@@ -58,7 +58,7 @@ class ArmController():
 
     def has_converged(self):
         converged = False
-        if(np.all(self.joint_state-self.joint_target < 0.0174533)):
+        if(np.all(self.joint_state-self.joint_target < 0.0574533)):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 1:
@@ -133,8 +133,6 @@ if __name__ == "__main__":
 
     for pos in pos_list:
         q = kin.inverse_kinematics(pos,np.deg2rad(45))
-        print(q,"angles")
-        print(kin.forward_kinematics(q)[0]["joint_4"])
         if q!=None:
             target_joints.append(q)
         else:

@@ -49,13 +49,13 @@ class webcam_node:
         while not rospy.is_shutdown():
 
             ret, frame = cap.read()
-
+            # frame = cv2.GaussianBlur(frame,15,0)
             height,width = frame.shape[0:2]
             keypoints = self.detector.detect(frame)
             if len(keypoints) is not 0:
                 print(keypoints[0].pt,"Updated")
                 self.y,self.z = keypoints[0].pt
-                self.error_pixel = np.array([0,-(self.y-width/2-5),self.z-height/2,1]).reshape(-1,1)
+                self.error_pixel = np.array([0,self.y-width/2-5,self.z-height/2,1]).reshape(-1,1)
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel
                 print(self.error_pixel,"error")
@@ -69,9 +69,9 @@ class webcam_node:
                 print("cannot publish")
             
 
-            # im_with_keypoints = cv2.drawKeypoints(im, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            # cv2.imshow("Keypoints", im_with_keypoints)
-            # cv2.waitKey(1)
+            im_with_keypoints = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            cv2.imshow("Keypoints", im_with_keypoints)
+            cv2.waitKey(1)
 
             rate.sleep()
 

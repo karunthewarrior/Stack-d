@@ -23,16 +23,14 @@ def compute_joint_angles(error_pixel,angles):
     H = kin.webcam_to_world(angles)
     error_world  = np.dot(H[:3,:3],error_pixel[:3])
     final_pos,fk_list = kin.forward_kinematics(angles)
+    print(final_pos["joint_4"],"before")
     J = kin.jacobian(fk_list)
     delta_q = alpha * np.dot(J.T,error_world)
-    print(final_pos,"before")
-    print(q,"before")
+    print(delta_q.shape)
     q[:3] = q[:3] + delta_q
-    print(q,"after")
     final_pos,_ = kin.forward_kinematics(q)
-    # q[3] = np.pi/2 - final_pos["joint_4"][4] 
-    # q[4] = -q[0]
-    print(final_pos,"before")
+    print(final_pos["joint_4"],"after")
+    q[4] = -q[0]
     return q
 
 if __name__ == '__main__':
@@ -40,21 +38,24 @@ if __name__ == '__main__':
         servoing = Point_detection()
         arm_controller = ac.ArmController()
 
-        pos = [0.2,0,-0.06]
+        pos = [0.25,-0.1,-0.06]
         q = kin.inverse_kinematics(pos,np.deg2rad(0))
         # arm_controller.home_arm()
         arm_controller.set_joint_state(q)
         while(not arm_controller.has_converged()):
             pass    
-        # print(compute_joint_angles(np.array([0,30,100,1]).reshape(-1,1),[0,np.deg2rad(45),np.deg2rad(20),np.deg2rad(30),0]))
         while not rospy.is_shutdown():
             angles = arm_controller.joint_state
+
             q = compute_joint_angles(servoing.error_pixel,angles)
+            final_pos,_ = kin.forward_kinematics(q)
+            # q[3] = np.pi/2 - final_pos["joint_4"][4] 
             rospy.loginfo(q)
             arm_controller.set_joint_state(q)
             # while(not arm_controller.has_converged()):
-            #     print(q)
             #     pass
+            # rospy.sleep(5)  
+
             if (np.all(np.abs(servoing.error_pixel<10))):
                 break 
 

@@ -8,23 +8,12 @@ import rospy
 import cv2
 from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-from std_msgs.msg import String
 from sensor_msgs.msg import Image
-# import matplotlib.pyplot as plt
 import scipy.ndimage
-from patch_detection.msg import detections
 from patch_detection.msg import blocks_detected
-# from ssearch import selectsearch
-from std_msgs.msg import Float64MultiArray
 
 class block_color():
     def __init__(self):
-        self.block_detect = detections()
-        self.block_detect.x = 0
-        self.block_detect.y = 0
-        self.block_detect.h = 0
-        self.block_detect.w = 0
-        self.block_detect.detected = False
         self.flag_block = False
         self.flag_depth = False
         rospy.init_node('color_seg', anonymous=True)
@@ -33,11 +22,9 @@ class block_color():
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.find_block)
         self.depth_sub = rospy.Subscriber("/camera/aligned_depth_to_color/image_raw", Image, self.find_depth)
 
-        self.im_coord = np.array([0,0])
         self.x_center = 0
         self.y_center = 0
         self.z_center = 0
-        self.position = Float64MultiArray()
         self.circle_list = []
         self.position_list = blocks_detected()
 
@@ -46,9 +33,12 @@ class block_color():
         #This function takes in rgb image and find the block
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
-        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.5)
+        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=1.4)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        edged = cv2.Canny(cv_image, 30, 200)
+        edged = cv2.Canny(cv_image, 140, 300)
+        cv2.imshow("edges",edged)
+        cv2.waitKey(1)
+
         self.circle_list = []
 
 
@@ -58,14 +48,12 @@ class block_color():
         result = cv2.drawContours(cv_image, contours, -1, (52, 198, 30))
         
         area_max = 0
-        area_patch = 0
-        p_max =  [0,0,0,0]
         box_list = []
         bound = np.array([0,0,0,0]).reshape(1,-1)
         for c in contours:
             #Approximating contour shape
             peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+            approx = cv2.approxPolyDP(c, 0.05 * peri, True)
 
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
@@ -76,33 +64,25 @@ class block_color():
             difference = np.sum(np.abs(bound - candidate)**2,axis=-1)**(1./2)
             min_difference = np.min(difference)
 
-            if(min_difference > 3):
+            if(min_difference > 5):
                 bound = np.append(bound,candidate,0)
-                if(w > 50 and h > 50 and len(approx) ==4 ):
+                if(w > 10 and h > 10 and w <200 and h<200 and len(approx) ==4 ):
                     box = cv2.boxPoints(rect)
                     self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1])]))
                     box_list.append(np.int0(box))
                     area_max = area
-                    p_max = [x,y,w,h]
-        
-        if(p_max and area_max > 0):
+
+        if(area_max > 0):
             image_used = result
             [cv2.drawContours(image_used,[boxes],0,(0,0,255),2) for boxes in box_list]
             [cv2.circle(image_used,(circle[0],circle[1]), 5, (0,0,255), -1) for circle in self.circle_list]
 
-            self.block_detect.detected = True
-            self.block_detect.x = p_max[0]
-            self.block_detect.y = p_max[1]
-            self.block_detect.w = p_max[2]
-            self.block_detect.h = p_max[3]
-            self.im_coord[0] = np.average(box_list[0][:,0])
-            self.im_coord[1] = np.average(box_list[0][:,1])
             cv2.imshow("realsense_window", image_used)
             cv2.waitKey(1)
 
             self.flag_block = True
         else:
-            self.block_detect.detected = False
+            self.flag_block = False
             cv2.imshow("realsense_window", hsv_image)
             cv2.waitKey(1)
 

@@ -13,7 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   sensor_msgs
   message_generation
-  geometry_msgs
 )
 
 
@@ -54,7 +53,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   detections.msg
-  blocks_detected.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -75,7 +73,6 @@ add_message_files(
 generate_messages(
    DEPENDENCIES
    std_msgs
-   geometry_msgs
  )
 
 ################################################

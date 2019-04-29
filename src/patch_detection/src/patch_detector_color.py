@@ -35,9 +35,9 @@ class block_color():
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
         cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        maskred = cv2.inRange(hsv_image,(1,50,0),(15,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(1,50,0),(10,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
-        maskblue = cv2.inRange(hsv_image, (80,50,0),(130,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (80,120,0),(120,255,255)) #create mask of colours
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen)
         cv2.imshow("lol",result)
@@ -55,7 +55,7 @@ class block_color():
         red_contours = np.array(list_red_contours)
         green_contours = np.array(list_green_contours)
         blue_contours = np.array(list_blue_contours)
-
+        dim_low = 40
         result = cv2.drawContours(cv_image, red_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
@@ -70,7 +70,7 @@ class block_color():
             area = (w*h)
 
 
-            if(w > 80 and h > 80 and len(approx)==4):
+            if(w > dim_low and h > dim_low and len(approx)==4):
                 box = cv2.boxPoints(rect)
                 self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
                 box_list.append(np.int0(box))
@@ -87,7 +87,7 @@ class block_color():
             area = (w*h)
 
 
-            if(w > 80 and h > 80 and len(approx)==4):
+            if(w > dim_low and h > dim_low and len(approx)==4):
                 box = cv2.boxPoints(rect)
                 self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
                 box_list.append(np.int0(box))
@@ -104,7 +104,7 @@ class block_color():
             area = (w*h)
 
 
-            if(w > 80 and h > 80 and len(approx)==4):
+            if(w > dim_low and h > dim_low and len(approx)==4):
                 box = cv2.boxPoints(rect)
                 self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
                 box_list.append(np.int0(box))

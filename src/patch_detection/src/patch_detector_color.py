@@ -33,44 +33,86 @@ class block_color():
         #This function takes in rgb image and find the block
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
-        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=1.4)
+        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        edged = cv2.Canny(cv_image, 140, 300)
-        cv2.imshow("edges",edged)
-        cv2.waitKey(1)
+        maskred = cv2.inRange(hsv_image,(1,50,0),(15,255,255)) #create mask of colours
+        maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (80,50,0),(130,255,255)) #create mask of colours
 
+        result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen)
+        cv2.imshow("lol",result)
+        cv2.waitKey(1)
         self.circle_list = []
 
 
-        # list_contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        _,list_contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        contours = np.array(list_contours)
-        result = cv2.drawContours(cv_image, contours, -1, (52, 198, 30))
-        
+        list_red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        list_blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # _,list_contours, hierarchy = cv2.findContours(edged, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours = []
+        red_contours = np.array(list_red_contours)
+        green_contours = np.array(list_green_contours)
+        blue_contours = np.array(list_blue_contours)
+
+        result = cv2.drawContours(cv_image, red_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
-        bound = np.array([0,0,0,0]).reshape(1,-1)
-        for c in contours:
+        for idx,c in enumerate(red_contours):
             #Approximating contour shape
+            col = 0
             peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
 
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
             area = (w*h)
 
-            #Bounding box supression
-            candidate = np.array([x,y,x+w,y+h]).reshape(1,-1)
-            difference = np.sum(np.abs(bound - candidate)**2,axis=-1)**(1./2)
-            min_difference = np.min(difference)
 
-            if(min_difference > 5):
-                bound = np.append(bound,candidate,0)
-                if(w > 10 and h > 10 and w <200 and h<200 and len(approx) ==4 ):
-                    box = cv2.boxPoints(rect)
-                    self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1])]))
-                    box_list.append(np.int0(box))
-                    area_max = area
+            if(w > 80 and h > 80 and len(approx)==4):
+                box = cv2.boxPoints(rect)
+                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
+                box_list.append(np.int0(box))
+                area_max = area
+
+        for idx,c in enumerate(green_contours):
+            #Approximating contour shape
+            col = 1
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
+            x, y, w, h = cv2.boundingRect(c)
+            rect = cv2.minAreaRect(c)
+            area = (w*h)
+
+
+            if(w > 80 and h > 80 and len(approx)==4):
+                box = cv2.boxPoints(rect)
+                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
+                box_list.append(np.int0(box))
+                area_max = area
+
+        for idx,c in enumerate(blue_contours):
+            #Approximating contour shape
+            col = 2
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.04 * peri, True)
+
+            x, y, w, h = cv2.boundingRect(c)
+            rect = cv2.minAreaRect(c)
+            area = (w*h)
+
+
+            if(w > 80 and h > 80 and len(approx)==4):
+                box = cv2.boxPoints(rect)
+                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
+                box_list.append(np.int0(box))
+                area_max = area
+
+
+
+
 
         if(area_max > 0):
             image_used = result
@@ -107,6 +149,7 @@ class block_color():
                 self.z_center = np.average(cv_image[point_int[1]-window:point_int[1]+window,point_int[0]-window:point_int[0]+window])
                 self.x_center = (points[0]-u_0)*self.z_center/f_x
                 self.y_center = (points[1]-v_0)*self.z_center/f_y
+                self.position_list.color.append(points[2])
                 self.position_list.x.append(self.x_center)
                 self.position_list.y.append(self.y_center)
                 self.position_list.z.append(self.z_center)

@@ -19,7 +19,6 @@ class Point_detection():
 
 def compute_joint_angles(error_pixel,angles):
     q = np.array(angles).reshape(-1,1)
-    print(error_pixel)
     alpha = 1e-3
     H = kin.webcam_to_world(angles)
     error_world  = np.dot(H[:3,:3],error_pixel[:3])
@@ -33,9 +32,20 @@ def compute_joint_angles(error_pixel,angles):
 
     return q
 
+def servoing(arm_controller,error_thresh = 10):
+    servoing = Point_detection()
+	if not np.all(servoing.error_pixel[:3] == 0):
+		while np.all(np.abs(servoing.error_pixel) < error_thresh):
+			angles = arm_controller.joint_state
+			q = compute_joint_angles(servoing.error_pixel,angles)
+            arm_controller.set_joint_state(q)
+        pose,fk_list = kin.forward_kinematics(q)
+       	x,y = pose["joint_4"][:2]
+       	return (x,y)
+   	return None
+
 if __name__ == '__main__':
     try:
-        servoing = Point_detection()
         arm_controller = ac.ArmController()
 
         pos = [0.25,-0.1,-0.06]
@@ -48,9 +58,7 @@ if __name__ == '__main__':
             angles = arm_controller.joint_state
 
             q = compute_joint_angles(servoing.error_pixel,angles)
-            arm_controller.set_joint_state(q)
-            # while(not arm_controller.has_converged_relaxed()):
-            # 	pass  
+            arm_controller.set_joint_state(q) 
 
             if (np.all(np.abs(servoing.error_pixel<10))):
                 break 

@@ -58,11 +58,24 @@ class ArmController():
 
     def has_converged(self):
         converged = False
-        if(np.linalg.norm(self.joint_state-self.joint_target) < 0.1):
+        # print(abs(self.joint_state-self.joint_target) < 0.0174533)
+        if(np.all(abs(self.joint_state-self.joint_target) < 0.0174533)):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
-            if (self.time - self.history[0]).to_sec() > 0.5:
+            if (self.time - self.history[0]).to_sec() > 1:
                 converged = True
+        else:
+            self.history = []   
+        return converged
+
+    def has_converged_relaxed(self):
+        converged = False
+        self.converged_joints = np.array((abs(self.joint_state[:3].reshape(-1,1)-self.joint_target[:3].reshape(-1,1)) < 3*0.0174533,abs(self.joint_state[3:5].reshape(-1,1)-self.joint_target[3:5].reshape(-1,1))<0.0174533))
+        if(np.all(abs(self.joint_state[:3].reshape(-1,1)-self.joint_target[:3].reshape(-1,1)) < 3*0.0174533) and np.all(abs(self.joint_state[3:5].reshape(-1,1)-self.joint_target[3:5].reshape(-1,1))<0.0174533)):
+            self.history.append(self.time)
+            if (self.time - self.history[0]).to_sec() > 1:
+                converged = True
+                print("converged")
         else:
             self.history = []   
         return converged
@@ -89,7 +102,7 @@ class CamController():
     def home_arm(self):
         self.set_joint_state(0)
         # rospy.sleep(5)
-        while(not controller.has_converged()):
+        while(not self.has_converged()):
             pass
 
 #Subscriber callback to get the current cam angle
@@ -103,7 +116,7 @@ class CamController():
         if(abs(self.cam_state-self.cam_target) < 0.1):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
-            if (self.time - self.history[0]).to_sec() > 0.1:
+            if (self.time - self.history[0]).to_sec() > 0.5:
                 converged = True
         else:
             self.history = []
@@ -120,7 +133,7 @@ if __name__ == "__main__":
     # rospy.sleep(2)
     # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
-    pos_list = [[ 0.25553596,  0.14467942, 0]]
+    pos_list = [[ 0.3, 0.1, 0]]
     # pos_list = [[]] 
     # for tilt in target_tilt:
     #     tilt_controller.set_cam_state(tilt)
@@ -132,8 +145,7 @@ if __name__ == "__main__":
     #         pass
 
     for pos in pos_list:
-        q = kin.inverse_kinematics(pos,0)
-        print(kin.forward_kinematics(q)[0]["joint_4"])
+        q = kin.inverse_kinematics(pos,np.deg2rad(45))
         if q!=None:
             target_joints.append(q)
         else:
@@ -141,7 +153,7 @@ if __name__ == "__main__":
             exit()
     rospy.sleep(2)
 
-
+    # target_joints = [[np.deg2rad(20),0,0,0,0]]
     # print(target_joints)
     arm_controller.home_arm()
     arm_controller.open()

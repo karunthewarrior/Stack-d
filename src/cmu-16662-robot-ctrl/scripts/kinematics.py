@@ -152,7 +152,7 @@ def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True)
         dx = target_pose - final_pos["joint_4"][:3]
     
     #Adding the offset to align the gripper parallel to the ground
-    q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    q[3] = np.pi/2 - final_pos["joint_3"][4] 
     #Adding the offset to account for the input yaw
     q[4] = -q[0] + yaw
     #Mapping the angle to lie within -pi/2 to pi/2 
@@ -177,11 +177,14 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    pos_list = [[0.3,0.02,0.1]]
-    q = [0,0,0,0,0]
-    _,fk_list = forward_kinematics(q)
-    jac = jacobian(fk_list,full=True)
-    print(jac)
-    for pos in pos_list:
-        q = inverse_kinematics(pos,0)
-        print(q)
+    # pos_list = [[0.3,0.02,0.1]]
+    # q = [0,0,0,0,0]
+    # _,fk_list = forward_kinematics(q)
+    # jac = jacobian(fk_list,full=True)
+    # print(jac)
+    # for pos in pos_list:
+    #     q = inverse_kinematics(pos,0)
+    #     print(q)
+    q = np.array([-0.37582532,  0.31600004,  0.34207773,0,0]).reshape(-1,1)
+    final_pos,_ = forward_kinematics(q)
+    print(final_pos)

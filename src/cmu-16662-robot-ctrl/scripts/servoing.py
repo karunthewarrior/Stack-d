@@ -19,18 +19,18 @@ class Point_detection():
 
 def compute_joint_angles(error_pixel,angles):
     q = np.array(angles).reshape(-1,1)
+    print(error_pixel)
     alpha = 1e-3
     H = kin.webcam_to_world(angles)
     error_world  = np.dot(H[:3,:3],error_pixel[:3])
     final_pos,fk_list = kin.forward_kinematics(angles)
-    print(final_pos["joint_4"],"before")
     J = kin.jacobian(fk_list)
     delta_q = alpha * np.dot(J.T,error_world)
-    print(delta_q.shape)
     q[:3] = q[:3] + delta_q
     final_pos,_ = kin.forward_kinematics(q)
-    print(final_pos["joint_4"],"after")
     q[4] = -q[0]
+    q[3] = np.pi/2 - final_pos["joint_3"][4] 
+
     return q
 
 if __name__ == '__main__':
@@ -48,13 +48,9 @@ if __name__ == '__main__':
             angles = arm_controller.joint_state
 
             q = compute_joint_angles(servoing.error_pixel,angles)
-            final_pos,_ = kin.forward_kinematics(q)
-            # q[3] = np.pi/2 - final_pos["joint_4"][4] 
-            rospy.loginfo(q)
             arm_controller.set_joint_state(q)
-            # while(not arm_controller.has_converged()):
-            #     pass
-            # rospy.sleep(5)  
+            # while(not arm_controller.has_converged_relaxed()):
+            # 	pass  
 
             if (np.all(np.abs(servoing.error_pixel<10))):
                 break 

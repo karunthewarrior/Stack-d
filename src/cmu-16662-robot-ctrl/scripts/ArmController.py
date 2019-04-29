@@ -58,11 +58,24 @@ class ArmController():
 
     def has_converged(self):
         converged = False
-        if(np.all(self.joint_state-self.joint_target < 0.0374533)):
+        print(abs(self.joint_state-self.joint_target) < 0.0174533)
+        if(np.all(abs(self.joint_state-self.joint_target) < 0.0174533)):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 1:
                 converged = True
+        else:
+            self.history = []   
+        return converged
+
+    def has_converged_relaxed(self):
+        converged = False
+        self.converged_joints = np.array((abs(self.joint_state[:3].reshape(-1,1)-self.joint_target[:3].reshape(-1,1)) < 3*0.0174533,abs(self.joint_state[3:5].reshape(-1,1)-self.joint_target[3:5].reshape(-1,1))<0.0174533))
+        if(np.all(abs(self.joint_state[:3].reshape(-1,1)-self.joint_target[:3].reshape(-1,1)) < 3*0.0174533) and np.all(abs(self.joint_state[3:5].reshape(-1,1)-self.joint_target[3:5].reshape(-1,1))<0.0174533)):
+            self.history.append(self.time)
+            if (self.time - self.history[0]).to_sec() > 1:
+                converged = True
+                print("converged")
         else:
             self.history = []   
         return converged

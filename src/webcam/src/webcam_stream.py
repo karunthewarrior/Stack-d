@@ -58,7 +58,6 @@ class webcam_node:
                 self.error_pixel = np.array([0,self.y-width/2-5,self.z-height/2,1]).reshape(-1,1)
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel
-                print(self.error_pixel,"error")
                 self.error_pub.publish(error_pixel)
             else:
                 print("no detection")

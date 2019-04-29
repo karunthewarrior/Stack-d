@@ -56,7 +56,7 @@ def webcam_to_world(angles):
     #Hardcoding the axis of rotations of the joints
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0],[1,0,0],[1,0,0]]
     #Hardcoding the fixed joint angles
-    angles = angles + [0,0]
+    angles = np.hstack([angles,np.array([0,0])])
     #Finding the relative transformation between each frame
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
     webcam_H = np.linalg.multi_dot(all_H)
@@ -120,7 +120,7 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 """
 def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
     #Computing gripper offset to account for error in end effector position
-    gripper_offset = np.array([0, 0, 0.22])
+    gripper_offset = np.array([0, 0, 0.23])
     if offset:
         target_pose = target_pose + gripper_offset
     #Initializing joint angles
@@ -152,7 +152,7 @@ def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True)
         dx = target_pose - final_pos["joint_4"][:3]
     
     #Adding the offset to align the gripper parallel to the ground
-    q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    q[3] = np.pi/2 - final_pos["joint_3"][4] 
     #Adding the offset to account for the input yaw
     q[4] = -q[0] + yaw
     #Mapping the angle to lie within -pi/2 to pi/2 
@@ -177,11 +177,14 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    pos_list = [[0.3,0.02,0.1]]
-    q = [0,0,0,0,0]
-    _,fk_list = forward_kinematics(q)
-    jac = jacobian(fk_list,full=True)
-    print(jac)
-    for pos in pos_list:
-        q = inverse_kinematics(pos,0)
-        print(q)
+    # pos_list = [[0.3,0.02,0.1]]
+    # q = [0,0,0,0,0]
+    # _,fk_list = forward_kinematics(q)
+    # jac = jacobian(fk_list,full=True)
+    # print(jac)
+    # for pos in pos_list:
+    #     q = inverse_kinematics(pos,0)
+    #     print(q)
+    q = np.array([-0.37582532,  0.31600004,  0.34207773,0,0]).reshape(-1,1)
+    final_pos,_ = forward_kinematics(q)
+    print(final_pos)

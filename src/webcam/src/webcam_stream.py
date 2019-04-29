@@ -53,14 +53,17 @@ class webcam_node:
             height,width = frame.shape[0:2]
             keypoints = self.detector.detect(frame)
             if len(keypoints) is not 0:
-                print(keypoints[0].pt,"Updated")
+                print(keypoints[0].pt,"detected")
                 self.y,self.z = keypoints[0].pt
                 self.error_pixel = np.array([0,self.y-width/2-5,self.z-height/2,1]).reshape(-1,1)
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel
                 self.error_pub.publish(error_pixel)
             else:
-                print("no detection")
+                error_pixel = Float64MultiArray()
+                error_pixel.data = np.array([0,0,0,1])
+                print("not found")
+                self.error_pub.publish(error_pixel)
 
             try:
                 self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame))

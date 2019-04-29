@@ -58,7 +58,7 @@ class ArmController():
 
     def has_converged(self):
         converged = False
-        print(abs(self.joint_state-self.joint_target) < 0.0174533)
+        # print(abs(self.joint_state-self.joint_target) < 0.0174533)
         if(np.all(abs(self.joint_state-self.joint_target) < 0.0174533)):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())

@@ -47,13 +47,14 @@ class block_color():
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
       
         #Dark then light colors
-        maskred = cv2.inRange(hsv_image, (1,80,30),(10,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image, (1,80,0),(10,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (80,100,40),(130,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (100,100,40),(110,255,255)) #create mask of colours
         masksilver = cv2.inRange(hsv_image, (0,0,0),(10,0,100))
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
-        _,list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # _,list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = np.array(list_contours)
         # result = cv2.drawContours(result, contours, -1, (52, 198, 30))
         

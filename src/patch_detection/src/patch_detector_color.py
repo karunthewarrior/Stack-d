@@ -10,7 +10,8 @@ from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
 from sensor_msgs.msg import Image
 import scipy.ndimage
-from patch_detection.msg import blocks_detected
+from patch_detection.msg import blocks_detected 
+# import blocks_detected
 
 class block_color():
     def __init__(self):
@@ -21,6 +22,7 @@ class block_color():
         self.pub = rospy.Publisher('block_detection', blocks_detected, queue_size=1)
         self.image_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.find_block)
         self.depth_sub = rospy.Subscriber("/camera/aligned_depth_to_color/image_raw", Image, self.find_depth)
+        self.flag_pic_taken = False
 
         self.x_center = 0
         self.y_center = 0
@@ -33,12 +35,12 @@ class block_color():
         #This function takes in rgb image and find the block
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
-        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=1.4)
+        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.5)
+        cv_image = cv_image[100:370,200:400]
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         edged = cv2.Canny(cv_image, 140, 300)
         cv2.imshow("edges",edged)
         cv2.waitKey(1)
-
         self.circle_list = []
 
 
@@ -53,7 +55,7 @@ class block_color():
         for c in contours:
             #Approximating contour shape
             peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.05 * peri, True)
+            approx = cv2.approxPolyDP(c, 0.03 * peri, True)
 
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
@@ -63,10 +65,10 @@ class block_color():
             candidate = np.array([x,y,x+w,y+h]).reshape(1,-1)
             difference = np.sum(np.abs(bound - candidate)**2,axis=-1)**(1./2)
             min_difference = np.min(difference)
-
             if(min_difference > 5):
                 bound = np.append(bound,candidate,0)
                 if(w > 10 and h > 10 and w <200 and h<200 and len(approx) ==4 ):
+                    print(approx)
                     box = cv2.boxPoints(rect)
                     self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1])]))
                     box_list.append(np.int0(box))
@@ -83,7 +85,7 @@ class block_color():
             self.flag_block = True
         else:
             self.flag_block = False
-            cv2.imshow("realsense_window", hsv_image)
+            cv2.imshow("realsense_window", cv_image)
             cv2.waitKey(1)
 
     def find_depth(self,im):
@@ -122,8 +124,6 @@ class block_color():
                 self.flag_depth = False
                 self.flag_block = False
             self.rate.sleep()
-
-
 
 
 if __name__ == '__main__':

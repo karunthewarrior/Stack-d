@@ -1,7 +1,6 @@
 import numpy as np
 import transforms3d as tf
 
-
 """
 Computes the homogenous transformation
 Input: orig - Relative translation from current frame to target frame
@@ -31,7 +30,6 @@ Output: Homogenous transformation from current frame to target frame
 def rot_H(R):
     return np.vstack([np.hstack([R,np.zeros(3).reshape(-1,1)]),[0,0,0,1]])
 
-
 """
 Computes the homogenous transformation from the camera frame to the world frame (arm_base_link_joint)
 Input: pan - pan motor angle
@@ -39,13 +37,30 @@ Input: pan - pan motor angle
 Output: cam_H - Homogenous transformation from camera frame to world frame 
 """
 def cam_to_world(pan,tilt):
-    orig_list = np.array([[-0.1154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.02, -0.00425]])
+    orig_list = np.array([[-0.1154999999999999, 0, 0.4112625],[0, 0, 0.05],[0.06705, 0.033, 0]])
     axis_list = [[0,0,1],[0,-1,0],[0,0,1]]
     angles = [pan,tilt,0]
     all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
     cam_H = np.linalg.multi_dot(all_H)
     H_cam_to_world = np.linalg.inv(cam_H)
     return cam_H
+
+"""
+Computes the homogenous transformation from the webcam frame to the world frame (arm_base_link_joint)
+Input: angles - list of the 5 joint angles of the arm 
+Output: webcam_H - Homogenous transformation from webcam frame to world frame 
+"""
+def webcam_to_world(angles):
+    #Hardcoding the translations between the joints
+    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.063, 0, 0],[0.027, 0, 0.043],[0.054,0,-0.0216]])
+    #Hardcoding the axis of rotations of the joints
+    axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0],[1,0,0],[1,0,0]]
+    #Hardcoding the fixed joint angles
+    angles = np.hstack([angles,np.array([0,0])])
+    #Finding the relative transformation between each frame
+    all_H = [get_H(origin,axis,angle) for origin,axis,angle in zip(orig_list,axis_list,angles)]
+    webcam_H = np.linalg.multi_dot(all_H)
+    return webcam_H
 
 """
 Computes forward kinematics of the arm
@@ -55,7 +70,7 @@ Output: pose - Dictionary containing the 6DOF pose of each joint
 """
 def forward_kinematics(angles):
     #Hardcoding the translations between the joints
-    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.193, 0, 0]])
+    orig_list = np.array([[0,0,0.072],[0, 0, 0.04125],[0.05, 0, 0.2],[0.2002, 0, 0],[0.063, 0, 0]])
     #Hardcoding the axis of rotations of the joints
     axis_list = [[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]]
     #Finding the relative transformation between each frame
@@ -83,10 +98,14 @@ Since we are only concerned with the position of the third joint, our jacobian i
 Input: fk_list - List of homogenous transformations for each joint computed by the forward kinematics
 Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D postion of each joint.
 """
-def jacobian(fk_list):
+def jacobian(fk_list,full=False):
     axis_list = np.array([[0,0,1],[0,1,0],[0,1,0],[0,1,0],[-1,0,0]])
     jac = []
-    for H,axis in zip(fk_list[:3],axis_list[:3]):  #only first three joints
+    if full:
+        ind = 5
+    else:
+        ind = 3
+    for H,axis in zip(fk_list[:ind],axis_list[:ind]):  #only first three joints
         a = np.dot(H[:3,:3],axis.reshape(-1,1)).reshape(1,-1)
         p = (fk_list[-1][:3,-1] - H[:3,-1]).reshape(1,-1)
         jac_column = np.cross(a,p).reshape(-1,1)
@@ -101,7 +120,7 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 """
 def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True):
     #Computing gripper offset to account for error in end effector position
-    gripper_offset = np.array([0, 0.015, 0.185])
+    gripper_offset = np.array([0, 0, 0.23])
     if offset:
         target_pose = target_pose + gripper_offset
     #Initializing joint angles
@@ -133,7 +152,7 @@ def inverse_kinematics(target_pose,yaw,open_grip=True,max_iter=1000,offset=True)
         dx = target_pose - final_pos["joint_4"][:3]
     
     #Adding the offset to align the gripper parallel to the ground
-    q[3] = np.pi/2 - final_pos["joint_4"][4] 
+    q[3] = np.pi/2 - final_pos["joint_3"][4] 
     #Adding the offset to account for the input yaw
     q[4] = -q[0] + yaw
     #Mapping the angle to lie within -pi/2 to pi/2 
@@ -158,6 +177,14 @@ def map_angle(a):
         return float(a)
 
 if __name__ == "__main__":
-    pos_list = [[0.3,0.02,0.4]]
-    for pos in pos_list:
-        q = inverse_kinematics(pos,0)
+    # pos_list = [[0.3,0.02,0.1]]
+    # q = [0,0,0,0,0]
+    # _,fk_list = forward_kinematics(q)
+    # jac = jacobian(fk_list,full=True)
+    # print(jac)
+    # for pos in pos_list:
+    #     q = inverse_kinematics(pos,0)
+    #     print(q)
+    q = np.array([-0.37582532,  0.31600004,  0.34207773,0,0]).reshape(-1,1)
+    final_pos,_ = forward_kinematics(q)
+    print(final_pos)

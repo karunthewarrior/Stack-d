@@ -50,51 +50,30 @@ class block_color():
         red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        big_contours = red_contours+green_contours+blue_contours
         # _,list_red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # _,list_blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # _,list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
+        red_len = len(red_contours)
+        green_len = len(green_contours)
+        blue_len = len(blue_contours)
         dim_low = 20
         shape_low = 2.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
 
-        for idx,c in enumerate(red_contours):
-            col = 0
+        for idx,c in enumerate(big_contours):
+            if(idx<red_len):
+                col = 0
+            elif(idx<red_len+green_len):
+                col=1
+            elif(idx<red_len+green_len+blue_len):
+                col=2
+
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
             area = (w*h)
-            d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            print(d2)
-            if(w > dim_low and h > dim_low and d2<shape_low):
-                box = cv2.boxPoints(rect)
-                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
-                box_list.append(np.int0(box))
-                area_max = area
-
-        for idx,c in enumerate(green_contours):
-            #Approximating contour shape
-            col = 1
-            x, y, w, h = cv2.boundingRect(c)
-            rect = cv2.minAreaRect(c)
-            area = (w*h)
-
-            d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            if(w > dim_low and h > dim_low and d2<shape_low):
-                box = cv2.boxPoints(rect)
-                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
-                box_list.append(np.int0(box))
-                area_max = area
-
-        for idx,c in enumerate(blue_contours):
-            #Approximating contour shape
-            col = 2
-            x, y, w, h = cv2.boundingRect(c)
-            rect = cv2.minAreaRect(c)
-            area = (w*h)
-
             d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
             if(w > dim_low and h > dim_low and d2<shape_low):
                 box = cv2.boxPoints(rect)

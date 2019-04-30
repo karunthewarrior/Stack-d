@@ -11,6 +11,7 @@ import numpy as np
 from sensor_msgs.msg import Image
 import scipy.ndimage
 from patch_detection.msg import blocks_detected
+import math
 
 class block_color():
     def __init__(self):
@@ -36,16 +37,15 @@ class block_color():
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
         cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        maskred = cv2.inRange(hsv_image,(1,100,0),(10,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(1,100,0),(13,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (90,150,0),(110,255,255)) #create mask of colours
 
-        result = cv_image
-        # result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
+        result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
         cv2.imshow("lol",result)
         cv2.waitKey(1)
         self.circle_list = []
-
+        result = cv_image
 
         red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -57,7 +57,7 @@ class block_color():
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
-        dim_low = 20
+        dim_low = 600
         shape_low = 2.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
@@ -75,9 +75,11 @@ class block_color():
             rect = cv2.minAreaRect(c)
             area = (w*h)
             d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            if(w > dim_low and h > dim_low and d2<shape_low):
+            if(area > dim_low and d2<shape_low):
                 box = cv2.boxPoints(rect)
-                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
+                idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
+                angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0]))
+                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col,angle]).astype(int))
                 box_list.append(np.int0(box))
                 area_max = area
 
@@ -87,9 +89,9 @@ class block_color():
             [cv2.drawContours(image_used,[boxes],0,(0,0,255),2) for boxes in box_list]
             [cv2.circle(image_used,(circle[0],circle[1]), 5, (0,0,255), -1) for circle in self.circle_list]
 
+
             cv2.imshow("realsense_window", image_used)
             cv2.waitKey(1)
-
             self.flag_block = True
         else:
             self.flag_block = False
@@ -118,6 +120,7 @@ class block_color():
                 self.x_center = (points[0]-u_0)*self.z_center/f_x
                 self.y_center = (points[1]-v_0)*self.z_center/f_y
                 self.position_list.color.append(points[2])
+                self.position_list.angle.append(points[3])
                 self.position_list.x.append(self.x_center)
                 self.position_list.y.append(self.y_center)
                 self.position_list.z.append(self.z_center)

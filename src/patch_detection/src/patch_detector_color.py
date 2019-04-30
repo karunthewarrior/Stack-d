@@ -37,9 +37,9 @@ class block_color():
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
         cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        maskred = cv2.inRange(hsv_image,(1,100,0),(13,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
-        maskblue = cv2.inRange(hsv_image, (90,150,0),(110,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
         cv2.imshow("lol",result)

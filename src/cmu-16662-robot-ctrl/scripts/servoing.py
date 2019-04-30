@@ -74,9 +74,13 @@ if __name__ == '__main__':
         q = kin.inverse_kinematics(pos,np.deg2rad(0))
         arm_controller.set_joint_state(q)
         while(not arm_controller.has_converged()):
-            pass    
+            pass
+        arm_controller.open()    
         print("seroving now")
         print(servo_xy(arm_controller,servo))
         servo_z(arm_controller,servo)
+        arm_controller.close()
+        rospy.sleep(1)
+        arm_controller.home_arm()
     except rospy.ROSInterruptException:
         pass

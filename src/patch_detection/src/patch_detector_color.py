@@ -40,8 +40,8 @@ class block_color():
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (90,150,0),(110,255,255)) #create mask of colours
 
-        # result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
         result = cv_image
+        # result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
         cv2.imshow("lol",result)
         cv2.waitKey(1)
         self.circle_list = []
@@ -55,7 +55,7 @@ class block_color():
         # _,list_blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # _,list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        dim_low = 15
+        dim_low = 20
         shape_low = 2.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0

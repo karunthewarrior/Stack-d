@@ -81,7 +81,7 @@ class block_color():
             area = (w*h)
 
             d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            if(w > dim_low and h > dim_low and d2<1.5):
+            if(w > dim_low and h > dim_low and d2<shape_low):
                 box = cv2.boxPoints(rect)
                 self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
                 box_list.append(np.int0(box))
@@ -95,7 +95,7 @@ class block_color():
             area = (w*h)
 
             d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            if(w > dim_low and h > dim_low and d2<1.5):
+            if(w > dim_low and h > dim_low and d2<shape_low):
                 box = cv2.boxPoints(rect)
                 self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col]).astype(int))
                 box_list.append(np.int0(box))

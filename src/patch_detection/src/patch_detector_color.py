@@ -59,9 +59,9 @@ class block_color():
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
-        dim_low = 2000
-        shape_low = 2.0
-        result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
+        dim_low = 1000
+        shape_low = 1.6
+        # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
 

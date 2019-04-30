@@ -11,7 +11,7 @@ The following instructions support ROS Indigo, on **Ubuntu 14.04**, and ROS Kine
 - #### Install from [Debian Package](https://github.com/IntelRealSense/librealsense/blob/master/doc/distribution_linux.md#installing-the-packages) - In that case treat yourself as a developer. Make sure you follow the instructions to also install librealsense2-dev and librealsense-dkms packages.
 
 #### OR
-- #### Build from sources by downloading the latest [Intel&reg; RealSense&trade; SDK 2.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.19.0) and follow the instructions under [Linux Installation](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md)
+- #### Build from sources by downloading the latest [Intel&reg; RealSense&trade; SDK 2.0](https://github.com/IntelRealSense/librealsense/releases/tag/v2.18.1) and follow the instructions under [Linux Installation](https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md)
 
 ### Step 2: Install the ROS distribution
 - #### Install [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu), on Ubuntu 16.04
@@ -73,6 +73,7 @@ If using D435 or D415, the gyro and accel topics wont be available. Likewise, ot
 The following parameters are available by the wrapper:
 - **serial_no**: will attach to the device with the given serial number. Default, attach to available RealSense device in random.
 - **rosbag_filename**: Will publish topics from rosbag file.
+- enable_t265: if set to true Will wait on start until the T265 device is ready.
 - **initial_reset**: On occasions the device was not closed properly and due to firmware issues needs to reset. If set to true, the device will reset prior to usage.
 - **align_depth**: If set to true, will publish additional topics with the all the images aligned to the depth image.</br>
 The topics are of the form: ```/camera/aligned_depth_to_color/image_raw``` etc.
@@ -89,7 +90,7 @@ The topics are of the form: ```/camera/aligned_depth_to_color/image_raw``` etc.
 - **enable_*<stream_name>***: Choose whether to enable a specified stream or not. Default is true. <stream_name> can be any of *infra1, infra2, color, depth, fisheye, fisheye1, fisheye2, gyro, accel, pose*.
 - **tf_prefix**: By default all frame's ids have the same prefix - `camera_`. This allows changing it per camera.
 - **base_frame_id**: defines the frame_id all static transformations refers to.
-- **odom_frame_id**: defines the origin coordinate system in ROS convention (X-Forward, Y-Left, Z-Up). pose topic defines the pose relative to that system.
+- **spatial_frame_id**: defines the frame_id that `pose` topic refers to.
 - **All the rest of the frame_ids can be found in the template launch file: [nodelet.launch.xml](./realsense2_camera/launch/includes/nodelet.launch.xml)**
 - **unite_imu_method**: The D435i and T265 cameras have built in IMU components which produce 2 unrelated streams: *gyro* - which shows angular velocity and *accel* which shows linear acceleration. Each with it's own frequency. By default, 2 corresponding topics are available, each with only the relevant fields of the message sensor_msgs::Imu are filled out.
 Setting *unite_imu_method* creates a new topic, *imu*, that replaces the default *gyro* and *accel* topics. Under the new topic, all the fields in the Imu message are filled out.
@@ -146,9 +147,10 @@ roslaunch realsense2_camera rs_camera.launch camera:=cam_2 serial_no:=<serial nu
 
 ```
 ## Using T265 ##
-**Important Notice:** For wheeled robots, odometer input is a requirement for robust and accurate tracking. The relevant APIs will be added to librealsense and ROS/realsense in upcoming releases. Currently, the API is available in the [underlying device driver](https://github.com/IntelRealSense/librealsense/blob/master/third-party/libtm/libtm/include/TrackingDevice.h#L508-L515).
-
-
+When using T265 Tracking Module you should specify it with a parameter `enable_t265` as is set in the following launch file:
+```bash
+roslaunch realsense2_camera rs_t265.launch
+```
 The T265 sets its usb unique ID during initialization and without this parameter it wont be found.
 Once running it will publish, among others, the following topics:
 - /camera/odom/sample
@@ -156,6 +158,7 @@ Once running it will publish, among others, the following topics:
 - /camera/gyro/sample
 - /camera/fisheye1/image_raw
 - /camera/fisheye2/image_raw
+
 
 ## Packages using RealSense ROS Camera
 | Title | Links |

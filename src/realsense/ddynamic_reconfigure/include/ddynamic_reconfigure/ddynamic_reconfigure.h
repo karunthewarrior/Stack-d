@@ -210,18 +210,14 @@ namespace ddynamic_reconfigure {
           * @brief the use defined callback to call when parameters are updated.
           */
           boost::shared_ptr<DDFunc> callback_;
-          #ifdef __clang__
           #pragma clang diagnostic push // CLion suppressor
           #pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
-          #endif
          /**
           * @brief the service server used to trigger parameter updates.
           *        It also contains the new parameters sent from client or commandline.
           */
           ros::ServiceServer set_service_;
-          #ifdef __clang__
           #pragma clang diagnostic pop
-          #endif
     };
 
     /**

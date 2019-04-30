@@ -43,24 +43,26 @@ class block_color():
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
 
-        result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
+        result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen)
         cv2.imshow("lol",result)
         cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
 
-        red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
         big_contours = red_contours+green_contours+blue_contours
-        # _,list_red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # _,list_blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # _,list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
         dim_low = 1000
-        shape_low = 1.6
+        shape_low = 5.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
@@ -77,12 +79,10 @@ class block_color():
             rect = cv2.minAreaRect(c)
             area = (w*h)
             d2_straight = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            d2_angled = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
+            d2_angled = cv2.matchShapes(self.c_slanted,c,cv2.CONTOURS_MATCH_I2,0)
             d2 = (d2_angled+d2_straight)/2
-            peri = cv2.arcLength(c, True)
-            approx = cv2.approxPolyDP(c, 0.03 * peri, True)
 
-            if(area > dim_low and d2<shape_low and len(approx)==4):
+            if(area > dim_low and d2<shape_low):
                 box = cv2.boxPoints(rect)
                 idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
                 angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0]))
@@ -140,7 +140,6 @@ class block_color():
             if(self.flag_depth == True and self.flag_block == True):
                 self.pub.publish(self.position_list)
                 self.position_list = blocks_detected()
-
                 self.flag_depth = False
                 self.flag_block = False
             self.rate.sleep()
@@ -151,4 +150,3 @@ class block_color():
 if __name__ == '__main__':
     blocker = block_color()
     blocker.control_loop()
-

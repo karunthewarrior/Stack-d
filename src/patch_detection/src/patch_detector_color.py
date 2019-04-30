@@ -29,6 +29,8 @@ class block_color():
         self.circle_list = []
         self.position_list = blocks_detected()
         self.c_sample = np.load('contour_sample.npy')
+        self.c_slanted = np.load('contour_slanted.npy')
+
 
 
     def find_block(self,im):
@@ -41,7 +43,7 @@ class block_color():
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
 
-        result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
+        result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
         cv2.imshow("lol",result)
         cv2.waitKey(1)
         self.circle_list = []
@@ -57,9 +59,9 @@ class block_color():
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
-        dim_low = 600
+        dim_low = 2000
         shape_low = 2.0
-        # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
+        result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
 
@@ -74,8 +76,13 @@ class block_color():
             x, y, w, h = cv2.boundingRect(c)
             rect = cv2.minAreaRect(c)
             area = (w*h)
-            d2 = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
-            if(area > dim_low and d2<shape_low):
+            d2_straight = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
+            d2_angled = cv2.matchShapes(self.c_sample,c,cv2.CONTOURS_MATCH_I2,0)
+            d2 = (d2_angled+d2_straight)/2
+            peri = cv2.arcLength(c, True)
+            approx = cv2.approxPolyDP(c, 0.03 * peri, True)
+
+            if(area > dim_low and d2<shape_low and len(approx)==4):
                 box = cv2.boxPoints(rect)
                 idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
                 angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0]))

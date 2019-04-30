@@ -36,11 +36,12 @@ class block_color():
         cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
         cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(1,100,0),(10,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (90,150,0),(110,255,255)) #create mask of colours
 
-        result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
+        # result = cv2.bitwise_and(cv_image, cv_image, mask=maskblue)
+        result = cv_image
         cv2.imshow("lol",result)
         cv2.waitKey(1)
         self.circle_list = []
@@ -54,9 +55,9 @@ class block_color():
         # _,list_blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # _,list_green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-        dim_low = 10
-        shape_low = 1.5
-        result = cv2.drawContours(cv_image, red_contours, -1, (52, 198, 30))
+        dim_low = 15
+        shape_low = 2.0
+        # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []
 

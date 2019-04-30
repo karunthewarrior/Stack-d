@@ -140,6 +140,7 @@ class block_color():
             if(self.flag_depth == True and self.flag_block == True):
                 self.pub.publish(self.position_list)
                 self.position_list = blocks_detected()
+
                 self.flag_depth = False
                 self.flag_block = False
             self.rate.sleep()

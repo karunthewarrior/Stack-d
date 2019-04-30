@@ -38,6 +38,7 @@ if __name__ =="__main__":
             arm_controller.set_joint_state(q)
             while(not arm_controller.has_converged()):
                 pass 
+            arm_controller.open()
             print("reached set point")
             rospy.sleep(1)
             print("servoing in xy now")
@@ -47,6 +48,7 @@ if __name__ =="__main__":
             rospy.sleep(1)
             serv.servo_z(arm_controller,servo)
             arm_controller.close()
+            serv.servo_z(arm_controller,servo,'up')
         else:
             print("No solution")
             exit()

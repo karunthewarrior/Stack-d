@@ -64,7 +64,7 @@ def servo_z(arm_controller,servo,mode='down'):
         arm_controller.set_joint_state(q)
         if mode == 'down':
             if len(error_list) > 10 :
-                if abs(error_list[-1]-error_list[-2]) < 0.002:
+                if np.all(abs(np.array(error_list[-1])-np.array(error_list[-4:-2])) < 0.002):
                     print("Converged")
                     break
         elif mode == 'up':

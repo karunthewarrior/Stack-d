@@ -53,8 +53,8 @@ class block_color():
         masksilver = cv2.inRange(hsv_image, (0,0,0),(10,0,100))
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskred)
-        # _,list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        _,list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # list_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         contours = np.array(list_contours)
         # result = cv2.drawContours(result, contours, -1, (52, 198, 30))
         
@@ -107,7 +107,6 @@ class block_color():
         # 0.0, 0.0, 1.0, 0.0
         bridge = CvBridge()
         cv_image = bridge.imgmsg_to_cv2(im, "passthrough")
-        print(cv_image.shape)
         f_x = 618.7474975585938
         f_y = 619.2664184570312
         u_0 = 324.06787109375
@@ -115,11 +114,9 @@ class block_color():
         window = 3
         if(self.flag_block == True):
             self.z_center = np.average(cv_image[self.im_coord[1]-window:self.im_coord[1]+window,self.im_coord[0]-window:self.im_coord[0]+window])
-            print(self.z_center)
             self.x_center = (self.im_coord[0]-u_0)*self.z_center/f_x
             self.y_center = (self.im_coord[1]-v_0)*self.z_center/f_y
             self.position.data = [self.x_center,self.y_center,self.z_center]
-            print(self.x_center,self.y_center,self.z_center)
             self.flag_depth = True
 
     

@@ -62,7 +62,7 @@ class tag_estimator:
         p_t = np.dot(H,p)
         
         p_end = [p_t[1],p_t[2],p_t[0],1]
-        print(p_end,"point")
+        # print(p_end,"point")
         # print(np.dot(H,p),"HIASDHASD")
         self.p = [p_end]
 

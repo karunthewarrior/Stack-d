@@ -12,7 +12,7 @@ from rospy_tutorials.msg import Floats
 
 def find_block_center(img,mask):
     thresh = cv2.bitwise_and(img, img, mask=mask)
-    _,contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     area_max = 0
     box_list = []
 
@@ -21,7 +21,7 @@ def find_block_center(img,mask):
         rect = cv2.minAreaRect(c)
         area = (w*h)
 
-        if(area > area_max and area> 100):
+        if(area > area_max and area> 200):
             box = cv2.boxPoints(rect)
             circle = np.array([np.average(box[:,0]),np.average(box[:,1])]).astype(int)
             area_max = area
@@ -71,12 +71,13 @@ class webcam_node:
             height,width = frame.shape[0:2]
             hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
+            # maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255))
             center = find_block_center(frame,maskred)
-            # keypoints = self.detector.detect(frame)
+            # keypoints = self.detector.detect(frame) 
             # if len(keypoints) is not 0:
             if np.any(center):
                 self.y,self.z = center[0],center[1]
-                self.error_pixel = np.array([0,-(self.y-width/2),self.z-height/2,1]).reshape(-1,1)
+                self.error_pixel = np.array([0,self.y-width/2,self.z-height/2,1]).reshape(-1,1)
                 print(self.error_pixel)
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel

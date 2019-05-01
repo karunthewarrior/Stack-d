@@ -32,7 +32,7 @@ def compute_joint_angles(error,angles,alpha=1e-3,pixel=True):
     q[3] = np.pi/2 - final_pos["joint_3"][4]
     return q
 
-def servo_xy(arm_controller,servo,error_thresh = 30):
+def servo_xy(arm_controller,servo,error_thresh = 20):
     if not np.all(servo.error_pixel[:3] == 0):
         while np.any(np.abs(servo.error_pixel) > error_thresh):
             print(servo.error_pixel,"errorpix")
@@ -40,6 +40,7 @@ def servo_xy(arm_controller,servo,error_thresh = 30):
             q = compute_joint_angles(servo.error_pixel,angles)
             # print(q,"Qs")
             arm_controller.set_joint_state(q)
+            rospy.sleep(0.5)
         pose,fk_list = kin.forward_kinematics(q)
         x,y = pose["joint_4"][:2]
         return (x,y)
@@ -62,11 +63,12 @@ def servo_z(arm_controller,servo,mode='down'):
         if abs(error[-1] - error_list[-1])>1e-4:
             error_list.append(error[-1])
             print(error[-1],"ERROR")
-        q = compute_joint_angles(error,angles,alpha=1.5,pixel=False)
+        q = compute_joint_angles(error,angles,alpha=1.8,pixel=False)
         arm_controller.set_joint_state(q)
+        rospy.sleep(0.5)
         if mode == 'down':
-            if len(error_list) > 10 :
-                if np.all(abs(np.array(error_list[-1])-np.array(error_list[-4:-2])) < 0.002):
+            if len(error_list) > 5 :
+                if np.all(abs(np.array(error_list[-1])-np.array(error_list[-2])) < 0.003):
                     print("Converged")
                     break
         elif mode == 'up':

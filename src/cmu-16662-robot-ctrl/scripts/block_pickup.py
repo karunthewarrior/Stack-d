@@ -15,18 +15,18 @@ if __name__ =="__main__":
 
     tilt_controller = ac.CamController('/tilt/state','/tilt/command')
     pan_controller = ac.CamController('/pan/state','/pan/command')
-    rospy.sleep(1)
+    rospy.sleep(0.5)
     pan_controller.set_cam_state(np.deg2rad(0))
     while(not pan_controller.has_converged()):
         pass
-    tilt_controller.set_cam_state(np.deg2rad(-38))
+    tilt_controller.set_cam_state(np.deg2rad(-40))
     while(not tilt_controller.has_converged()):
         pass
-    rospy.sleep(1)
+    rospy.sleep(0.5)
     print("DONE")
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
-    servo_height = 0.1
+    servo_height = 0
 
     if len(estimator.p) == 1:
         pw = [np.hstack([np.dot(H_c2w,p)[:2],servo_height]) for p in estimator.p]
@@ -53,10 +53,16 @@ if __name__ =="__main__":
                 arm_controller.set_joint_state(q)
                 while(not arm_controller.has_converged()):
                     pass
+            q = kin.inverse_kinematics(np.array([x+0.037,y,-0.07]),0)
+            print(q,"angls")
+            if q!=None:
+                arm_controller.set_joint_state(q)
+                while(not arm_controller.has_converged()):
+                    pass
             # print("NO SOLUTION!!")
-            print("servoing in z now")
-            rospy.sleep(1)
-            serv.servo_z(arm_controller,servo)
+            # print("servoing in z now")
+            # rospy.sleep(1)
+            # serv.servo_z(arm_controller,servo)
             arm_controller.close()
             serv.servo_z(arm_controller,servo,'up')
         else:

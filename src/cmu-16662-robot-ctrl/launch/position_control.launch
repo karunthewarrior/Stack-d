@@ -4,7 +4,7 @@
 
   <arg name="scan_range"                 default="10"/>
 
-  <arg name="profile_velocity"           default="25"/>
+  <arg name="profile_velocity"           default="15"/>
   <arg name="profile_acceleration"       default="5"/>
 
   <arg name="use_arm"                    default="true"/>

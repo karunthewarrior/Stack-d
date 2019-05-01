@@ -12,7 +12,7 @@ from rospy_tutorials.msg import Floats
 
 def find_block_center(img,mask):
     thresh = cv2.bitwise_and(img, img, mask=mask)
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _,contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     area_max = 0
     box_list = []
 

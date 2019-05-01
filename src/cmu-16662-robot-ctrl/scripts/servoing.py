@@ -16,7 +16,7 @@ class Point_detection():
     def get_error(self, error_pixel):
         self.error_pixel = np.array(error_pixel.data).reshape(-1,1)
 
-def compute_joint_angles(error,angles,alpha=1e-3,pixel=True):
+def compute_joint_angles(error,angles,alpha=5e-3,pixel=True):
     q = np.array(angles).reshape(-1,1)
     H = kin.webcam_to_world(angles)
     if pixel:
@@ -32,7 +32,7 @@ def compute_joint_angles(error,angles,alpha=1e-3,pixel=True):
     q[3] = np.pi/2 - final_pos["joint_3"][4]
     return q
 
-def servo_xy(arm_controller,servo,error_thresh = 20):
+def servo_xy(arm_controller,servo,error_thresh = 10):
     if not np.all(servo.error_pixel[:3] == 0):
         while np.any(np.abs(servo.error_pixel) > error_thresh):
             print(servo.error_pixel,"errorpix")

@@ -34,7 +34,7 @@ class tag_estimator:
     def get_point(self,blocks):
         self.p = []
         for x,y,z,c,theta in zip(blocks.x,blocks.y,blocks.z,blocks.color,blocks.angle):
-            p = [x/1000,y/1000,z/1000,1]  #removed +5 on pos.data[2]
+            p = [x/1000,y/1000,(z+5)/1000,1]  #removed +5 on pos.data[2]
             q = np.array([0.500, -0.500, 0.500, 0.500])
             R = tf.quaternions.quat2mat(q)
             H = kin.rot_H(R)
@@ -52,14 +52,19 @@ class tag_estimator:
         rospy.loginfo(pub_data)
         self.pub.publish(pub_data)
 
-def make_trajectory(s,d):
-    p_list = [s[:3]+np.array([0,0,0.09]),
+def make_trajectory(s,d,yaw=False):
+    p_list = [s[:3]+np.array([0.02,-0.05,0.09]),
                 s[:3],
                 s[:3]+np.array([0,0,0.09]),
                 d[:3]+np.array([0,0,0.09]),
                 d[:3],
                 d[:3]+np.array([0,0,0.09])]
-    return p_list
+    grip_list = [False,True,True,True,False,False]
+    if yaw:
+        yaw_list = [0,0,0,np.pi/2,np.pi/2,np.pi/2]
+    else:
+        yaw_list = [0,0,0,0,0,0]
+    return p_list,grip_list,yaw_list
 
 def make_destination(center,levels):
     dist_x, dist_y = 0.06,0.06
@@ -95,7 +100,7 @@ if __name__ =="__main__":
     if len(estimator.p) == 1:
         pw = [np.dot(H_c2w,p) for p in estimator.p]
         print(pw,"point1")
-        destination = make_destination(np.array([0.30,0.13,0]),levels=2)
+        destination = make_destination(np.array([0.30,0.17,0]),levels=2)
         pos_list = []
         rospy.loginfo(destination)
         for s,d in zip(pw,destination):

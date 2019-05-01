@@ -63,7 +63,7 @@ class webcam_node:
 
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(4)
+        cap = cv2.VideoCapture(0)
         while not rospy.is_shutdown():
 
             ret, frame = cap.read()
@@ -76,8 +76,10 @@ class webcam_node:
             # if len(keypoints) is not 0:
             if np.any(center):
                 self.y,self.z = center[0],center[1]
-                self.error_pixel = np.array([0,-(self.y-width/2),self.z-height/2,1]).reshape(-1,1)
-                print(self.error_pixel)
+                # print(self.y,width/2,"Y")
+                # print(self.z,height/2,"Z")
+                self.error_pixel = np.array([0,self.y-width/2,self.z-height/2,1]).reshape(-1,1)
+                print(self.error_pixel,"erre")
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel
                 self.error_pub.publish(error_pixel)

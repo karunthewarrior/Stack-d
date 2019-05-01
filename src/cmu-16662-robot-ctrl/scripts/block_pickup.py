@@ -11,22 +11,20 @@ if __name__ =="__main__":
     servo = serv.Point_detection()
     arm_controller = ac.ArmController()
 
-
-
     tilt_controller = ac.CamController('/tilt/state','/tilt/command')
     pan_controller = ac.CamController('/pan/state','/pan/command')
     rospy.sleep(1)
     pan_controller.set_cam_state(np.deg2rad(0))
     while(not pan_controller.has_converged()):
         pass
-    tilt_controller.set_cam_state(np.deg2rad(-38))
+    tilt_controller.set_cam_state(np.deg2rad(-40))
     while(not tilt_controller.has_converged()):
         pass
     rospy.sleep(1)
     print("DONE")
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
-    servo_height = 0.1
+    servo_height = 0.03
 
     if len(estimator.p) == 1:
         pw = [np.hstack([np.dot(H_c2w,p)[:2],servo_height]) for p in estimator.p]

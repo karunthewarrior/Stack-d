@@ -156,9 +156,9 @@ bool PositionControl::initArm()
 
   for (int index = 1; index < 3; ++index)
   {
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 180);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 50);
     dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 0);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 2000);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 1500);
   }
 
   dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_I_Gain", 80);

@@ -20,9 +20,14 @@ def compute_joint_angles(error,angles,alpha=1e-3,pixel=True):
     q = np.array(angles).reshape(-1,1)
     H = kin.webcam_to_world(angles)
     if pixel:
+        # print("ttans")
         error_world  = np.dot(H[:3,:3],error[:3])
+        error_world[-1] = 0 
     else:
+        # print("nto tras")
         error_world = error
+    # print("ERROR WOE",error_world)
+
     final_pos,fk_list = kin.forward_kinematics(angles)
     J = kin.jacobian(fk_list)
     delta_q = alpha * np.dot(J.T,error_world)

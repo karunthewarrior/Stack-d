@@ -10,6 +10,24 @@ from cv_bridge import CvBridge, CvBridgeError
 from rospy.numpy_msg import numpy_msg
 from rospy_tutorials.msg import Floats
 
+def find_block_center(img,mask):
+    thresh = cv2.bitwise_and(img, img, mask=mask)
+    _,contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    area_max = 0
+    box_list = []
+
+    for c in contours:
+        x, y, w, h = cv2.boundingRect(c)
+        rect = cv2.minAreaRect(c)
+        area = (w*h)
+
+        if(area > area_max and area> 100):
+            box = cv2.boxPoints(rect)
+            circle = np.array([np.average(box[:,0]),np.average(box[:,1])]).astype(int)
+            area_max = area
+
+    if(area_max > 0):
+        return circle
 
 class webcam_node:
 
@@ -41,7 +59,7 @@ class webcam_node:
         # # Filter by Inertia
         # params.filterByInertia = True
         # params.minInertiaRatio = 0.01
-        self.detector = cv2.SimpleBlobDetector_create(params)
+        # self.detector = cv2.SimpleBlobDetector_create(params)
 
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
@@ -51,18 +69,23 @@ class webcam_node:
             ret, frame = cap.read()
             # frame = cv2.GaussianBlur(frame,15,0)
             height,width = frame.shape[0:2]
-            keypoints = self.detector.detect(frame)
-            if len(keypoints) is not 0:
-                print(keypoints[0].pt,"detected")
-                self.y,self.z = keypoints[0].pt
-                self.error_pixel = np.array([0,self.y-width/2-5,self.z-height/2,1]).reshape(-1,1)
+            hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
+            center = find_block_center(frame,maskred)
+            # keypoints = self.detector.detect(frame)
+            # if len(keypoints) is not 0:
+            if np.any(center):
+                self.y,self.z = center[0],center[1]
+                self.error_pixel = np.array([0,-(self.y-width/2),self.z-height/2,1]).reshape(-1,1)
+                print(self.error_pixel)
                 error_pixel = Float64MultiArray()
                 error_pixel.data = self.error_pixel
                 self.error_pub.publish(error_pixel)
+                cv2.circle(frame,(center[0],center[1]), 5, (0,0,255), -1)
             else:
                 error_pixel = Float64MultiArray()
                 error_pixel.data = np.array([0,0,0,1])
-                print("not found")
+                # print("not found")
                 self.error_pub.publish(error_pixel)
 
             try:
@@ -71,8 +94,9 @@ class webcam_node:
                 print("cannot publish")
             
 
-            im_with_keypoints = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-            cv2.imshow("Keypoints", im_with_keypoints)
+            # im_with_keypoints = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            
+            cv2.imshow("Keypoints", frame)
             cv2.waitKey(1)
 
             rate.sleep()

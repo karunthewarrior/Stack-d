@@ -6,6 +6,7 @@ import math
 import kinematics as kin
 import ArmController as ac
 import transforms3d as tf
+from patch_detection.msg import blocks_detected
 
 class tag_estimator:
     def __init__(self):
@@ -21,7 +22,7 @@ class tag_estimator:
         self.sub_tilt = rospy.Subscriber(self.tilt_state_topic,Float64,self.get_tilt)
 
         # self.sub_tag = rospy.Subscriber(self.camera_pose_topic,AlvarMarkers,self.get_point)
-        self.sub_col = rospy.Subscriber(self.camera_pose_topic,Float64MultiArray,self.get_point)
+        self.sub_col = rospy.Subscriber(self.camera_pose_topic,blocks_detected,self.get_point)
         self.pub = rospy.Publisher(self.world_point_topic,Float64MultiArray, queue_size=1)
 
     def get_pan(self,pan):
@@ -30,41 +31,16 @@ class tag_estimator:
     def get_tilt(self,tilt):
         self.tilt = tilt.data
 
-    # def get_point(self,tag):
-    #     try:
-    #         rospy.loginfo(len(tag.markers))
-    #         if len(tag.markers) ==2:
-    #             # rospy.loginfo("GOT IT")
-    #             self.p = []
-    #             for marker in tag.markers:
-    #                 ar_position_obj = marker.pose.pose.position
-    #                 p = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-    #                 self.p.append(p)
-
-    #             # if marker.id == 2:
-    #             #     self.p1 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-    #             # elif marker.id == 4:
-    #             #     self.p2 = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-    #         # rospy.loginfo(ar_position_obj)
-    #         # self.position_camera = np.array([ar_position_obj.x,ar_position_obj.y,ar_position_obj.z,1])
-    #     # self.position_camera = np.array([ar_position_obj.z,-ar_position_obj.x,ar_position_obj.y,1])
-    #     except:
-    #         # rospy.loginfo("No detection")
-    #         pass
-    #     # self.position_camera = np.array([0,0,0,0])
-    #     # self.set_point()
-
-    def get_point(self,pos):
-        p = [pos.data[0]/1000,pos.data[1]/1000,(pos.data[2]+5)/1000,1]
-        q = np.array([0.500, -0.500, 0.500, 0.500])
-        R = tf.quaternions.quat2mat(q)
-        H = kin.rot_H(R)
-        p_t = np.dot(H,p)
-        
-        p_end = [p_t[1],p_t[2],p_t[0],1]
-        # print(p_end,"point")
-        # print(np.dot(H,p),"HIASDHASD")
-        self.p = [p_end]
+    def get_point(self,blocks):
+        self.p = []
+        for x,y,z,c,theta in zip(blocks.x,blocks.y,blocks.z,blocks.color,blocks.angle):
+            p = [x/1000,y/1000,z/1000,1]  #removed +5 on pos.data[2]
+            q = np.array([0.500, -0.500, 0.500, 0.500])
+            R = tf.quaternions.quat2mat(q)
+            H = kin.rot_H(R)
+            p_t = np.dot(H,p)
+            p_end = [p_t[1],p_t[2],p_t[0],1]
+            self.p.append(p_end)
 
 
     def set_point(self):

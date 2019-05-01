@@ -35,8 +35,10 @@ def compute_joint_angles(error,angles,alpha=1e-3,pixel=True):
 def servo_xy(arm_controller,servo,error_thresh = 30):
     if not np.all(servo.error_pixel[:3] == 0):
         while np.any(np.abs(servo.error_pixel) > error_thresh):
+            print(servo.error_pixel,"errorpix")
             angles = arm_controller.joint_state
             q = compute_joint_angles(servo.error_pixel,angles)
+            # print(q,"Qs")
             arm_controller.set_joint_state(q)
         pose,fk_list = kin.forward_kinematics(q)
         x,y = pose["joint_4"][:2]

@@ -13,6 +13,8 @@ import scipy.ndimage
 from patch_detection.msg import blocks_detected
 import math
 
+
+
 class block_color():
     def __init__(self):
         self.flag_block = False
@@ -44,8 +46,8 @@ class block_color():
         maskblue = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen)
-        cv2.imshow("lol",result)
-        cv2.waitKey(1)
+        # cv2.imshow("lol",result)
+        # cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
 

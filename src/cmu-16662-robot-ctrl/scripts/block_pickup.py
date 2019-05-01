@@ -25,13 +25,16 @@ if __name__ =="__main__":
     rospy.sleep(1)
     print("DONE")
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
+    
+    servo_height = 0.1
+
     if len(estimator.p) == 1:
-        pw = [np.dot(H_c2w,p)[:3] for p in estimator.p]
+        pw = [np.hstack([np.dot(H_c2w,p)[:2],servo_height]) for p in estimator.p]
     else:
         print("no block detected")
     # rospy.loginfo(estimator.position_camera)
     # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
-    arm_controller.home_arm()
+    # arm_controller.home_arm()
     for pos in pw:
         q = kin.inverse_kinematics(pos,0)  #ADD DESIRED YAW 
         if q!=None:
@@ -43,7 +46,14 @@ if __name__ =="__main__":
             rospy.sleep(1)
             print("servoing in xy now")
             (x,y) = serv.servo_xy(arm_controller,servo)
-            print("done servoing xy")
+            print("Finished servoing xy")
+            q = kin.inverse_kinematics(np.array([x+0.037,y,-0.05]),0)
+            print(q,"angls")
+            if q!=None:
+                arm_controller.set_joint_state(q)
+                while(not arm_controller.has_converged()):
+                    pass
+            # print("NO SOLUTION!!")
             print("servoing in z now")
             rospy.sleep(1)
             serv.servo_z(arm_controller,servo)

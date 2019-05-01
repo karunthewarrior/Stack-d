@@ -34,6 +34,7 @@ def compute_joint_angles(error,angles,alpha=5e-3,pixel=True):
 
 def servo_xy(arm_controller,servo,error_thresh = 10):
     if not np.all(servo.error_pixel[:3] == 0):
+        q = arm_controller.joint_state
         while np.any(np.abs(servo.error_pixel) > error_thresh):
             print(servo.error_pixel,"errorpix")
             angles = arm_controller.joint_state

@@ -141,35 +141,35 @@ bool PositionControl::initArm()
   dxl_wb_arm_->addSyncWrite("Goal_Position");
 
   // Write values
-  for (int index = 0; index < dxl_cnt_arm_; ++index)
-  {
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 5);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 30);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Drive_Mode", 0);
-  }
+  // for (int index = 0; index < dxl_cnt_arm_; ++index)
+  // {
+  //   dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 5);
+  //   dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 30);
+  //   dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Drive_Mode", 0);
+  // }
 
 
-  //Turning gains for specific motors
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_I_Gain", 80);
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_D_Gain", 0);
+  // //Turning gains for specific motors
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_I_Gain", 80);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_D_Gain", 0);
   dxl_wb_arm_->itemWrite(dxl_id_arm_[0], "Position_P_Gain", 1500);
 
   for (int index = 1; index < 3; ++index)
   {
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 80);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 0);
-    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 1200);
+    // dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_I_Gain", 80);
+    // dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_D_Gain", 0);
+    dxl_wb_arm_->itemWrite(dxl_id_arm_[index], "Position_P_Gain", 1800);
   }
 
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_I_Gain", 80);
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_D_Gain", 0);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_I_Gain", 80);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_D_Gain", 0);
   dxl_wb_arm_->itemWrite(dxl_id_arm_[3], "Position_P_Gain", 1500);
 
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_I_Gain", 60);
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_D_Gain", 0);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_I_Gain", 60);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_D_Gain", 0);
   dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_P_Gain", 1500);
 
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_I_Gain", 50);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_I_Gain", 50);
   dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_D_Gain", 0);
   dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_P_Gain", 1200);
 

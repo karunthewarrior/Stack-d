@@ -35,7 +35,7 @@ if __name__ =="__main__":
     # rospy.loginfo(estimator.position_camera)
     # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
     # arm_controller.home_arm()
-    destination = tag.make_destination(np.array([0.25,-0.13,-0.11]),levels=1)
+    destination = tag.make_destination(np.array([0.25,-0.16,-0.08]),levels=1)
     print(pw)
     for i,(pos,dest) in enumerate(zip(pw,destination)):
         q = kin.inverse_kinematics(pos-np.array([0.02,0,0]),0)  #ADD DESIRED YAW 
@@ -56,7 +56,7 @@ if __name__ =="__main__":
                 yaw_flag = False
             traj,grip,yaw_list = tag.make_trajectory(s,dest,yaw_flag)
             for pt,g,yaw in zip(traj,grip,yaw_list):
-                q = kin.inverse_kinematics(pt,0)
+                q = kin.inverse_kinematics(pt,yaw)
                 arm_controller.set_joint_state(q)
                 while(not arm_controller.has_converged()):
                     pass

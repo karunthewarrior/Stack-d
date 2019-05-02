@@ -5,7 +5,7 @@ import cv2
 import numpy as np 
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64MultiArray, Int32 
+from std_msgs.msg import Float64MultiArray, Int32 ,Float32
 from cv_bridge import CvBridge, CvBridgeError
 from rospy.numpy_msg import numpy_msg
 from rospy_tutorials.msg import Floats
@@ -23,11 +23,13 @@ def find_block_center(img,mask):
 
         if(area > area_max and area> 200):
             box = cv2.boxPoints(rect)
+            idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
+            angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0])) + 90
             circle = np.array([np.average(box[:,0]),np.average(box[:,1])]).astype(int)
             area_max = area
 
     if(area_max > 0):
-        return circle
+        return circle,angle
 
 class webcam_node:
 
@@ -41,6 +43,7 @@ class webcam_node:
         self.z = 40
         params = cv2.SimpleBlobDetector_Params()
         self.error_pub = rospy.Publisher("pixel_error",Float64MultiArray,queue_size = 1)
+        self.angle_pub = rospy.Publisher("block_yaw",Float32,queue_size = 1)
         params.minThreshold = 10
         params.maxThreshold = 400
         self.color_mask = -1
@@ -81,7 +84,8 @@ class webcam_node:
                 mask = cv2.inRange(hsv_image, (20,50,0),(70,255,255))
             else:
                 mask = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
-            center = find_block_center(frame,mask)
+            center,angle = find_block_center(frame,mask)
+            self.angle_pub.publish(angle)
             # keypoints = self.detector.detect(frame) 
             # if len(keypoints) is not 0:
             if np.any(center):

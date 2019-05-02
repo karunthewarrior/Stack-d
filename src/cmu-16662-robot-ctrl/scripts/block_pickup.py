@@ -29,7 +29,7 @@ if __name__ =="__main__":
     servo_height = 0.03
     rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 1:
+    if len(estimator.p) == 4:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:

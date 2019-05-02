@@ -66,6 +66,17 @@ def make_trajectory(s,d,yaw=False):
         yaw_list = [0,0,0,0,0,0]
     return p_list,grip_list,yaw_list
 
+def make_trajectory_yaw(s,d,yaw=0):
+    p_list = [s[:3]+np.array([0.02,-0.05,0.09]),
+                s[:3],
+                s[:3]+np.array([0,0,0.09]),
+                d[:3]+np.array([0,0,0.09]),
+                d[:3],
+                d[:3]+np.array([0,0,0.09])]
+    grip_list = [False,True,True,True,False,False]
+    yaw_list = [0,0,0,yaw,yaw,0]
+    return p_list,grip_list,yaw_list
+
 def make_destination(center,levels):
     dist_x, dist_y = 0.06,0.06
     d_list = []
@@ -78,7 +89,7 @@ def make_destination(center,levels):
     d = np.vstack(d_list)
     return d
 
-def move_structure(center,block_points):
+def move_structure(center,block_points,height = -0.08):
     x_center = 0
     y_center = 0
     for i in block_points:
@@ -87,7 +98,7 @@ def move_structure(center,block_points):
     x_center = x_center/len(block_points)
     y_center = y_center/len(block_points)
 
-    new_block_points = [(x - x_center + center,y - y_center+center,theta) for x,y,theta in block_points]
+    new_block_points = [((x - x_center + center[0],y - y_center+center[1],height),theta) for x,y,theta in block_points]
     return new_block_points
 
 

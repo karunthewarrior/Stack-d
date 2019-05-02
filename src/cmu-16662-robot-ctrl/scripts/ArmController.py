@@ -113,7 +113,7 @@ class CamController():
 #Checks if the angle has converged to the target
     def has_converged(self):
         converged = False
-        if(abs(self.cam_state-self.cam_target) < 0.1):
+        if(abs(self.cam_state-self.cam_target) < 5*0.0174533):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
             if (self.time - self.history[0]).to_sec() > 0.5:

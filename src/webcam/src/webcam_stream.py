@@ -9,6 +9,7 @@ from std_msgs.msg import Float64MultiArray, Int32 ,Float32
 from cv_bridge import CvBridge, CvBridgeError
 from rospy.numpy_msg import numpy_msg
 from rospy_tutorials.msg import Floats
+import math
 
 def find_block_center(img,mask):
     thresh = cv2.bitwise_and(img, img, mask=mask)
@@ -22,14 +23,17 @@ def find_block_center(img,mask):
         area = (w*h)
 
         if(area > area_max and area> 200):
-            box = cv2.boxPoints(rect)
-            idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
-            angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0])) + 90
+            box = cv2.boxPoints(rect)   
+            idx = (np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)]))
+            angle = -(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0]) + np.pi/2)
             circle = np.array([np.average(box[:,0]),np.average(box[:,1])]).astype(int)
             area_max = area
 
     if(area_max > 0):
         return circle,angle
+    else:
+        return None,None
+
 
 class webcam_node:
 
@@ -78,6 +82,7 @@ class webcam_node:
             height,width = frame.shape[0:2]
             hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
             print(self.color_mask)
+            self.color_mask = 0
             if self.color_mask == 0:
                 mask = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
             elif self.color_mask == 1:
@@ -85,6 +90,7 @@ class webcam_node:
             else:
                 mask = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
             center,angle = find_block_center(frame,mask)
+            # print()
             self.angle_pub.publish(angle)
             # keypoints = self.detector.detect(frame) 
             # if len(keypoints) is not 0:
@@ -99,7 +105,7 @@ class webcam_node:
             else:
                 error_pixel = Float64MultiArray()
                 error_pixel.data = np.array([0,0,0,1])
-                # print("not found")
+                print("not found")
                 self.error_pub.publish(error_pixel)
 
             try:

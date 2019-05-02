@@ -27,9 +27,9 @@ if __name__ =="__main__":
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
     servo_height = 0.03
-    rospy.sleep(5)
+    rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 1:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:
@@ -50,7 +50,7 @@ if __name__ =="__main__":
             print("reached set point")
             rospy.sleep(1)
             print("servoing in xy now")
-            (x,y) = serv.servo_xy(arm_controller,servo)
+            (x,y,theta) = serv.servo_xy(arm_controller,servo)
             print("Finished servoing xy")
             s = np.array([x+0.037,y,-0.08])
             if i > 1:
@@ -59,14 +59,14 @@ if __name__ =="__main__":
                 yaw_flag = False
             traj,grip,yaw_list = tag.make_trajectory(s,dest,yaw_flag)
             for ind,(pt,g,yaw) in enumerate(zip(traj,grip,yaw_list)):
-                q = kin.inverse_kinematics(pt,yaw)
+                q = kin.inverse_kinematics(pt,theta)
                 arm_controller.set_joint_state(q)
 
                 while(not arm_controller.has_converged()):
                     pass
                 if ind == 1 or ind ==4:
-                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
-                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    serv.servo_z(arm_controller,servo,'down',yaw=theta)
+                    serv.servo_z(arm_controller,servo,'down',yaw=theta)
                 if g:
                     arm_controller.close()
                 else:

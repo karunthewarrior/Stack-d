@@ -6,15 +6,20 @@ from cv_bridge import CvBridge, CvBridgeError
 from pprint import pprint
 import ArmController as ac
 import kinematics as kin
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray,Float32
+
 
 class Point_detection():
     def __init__(self):
         rospy.Subscriber("pixel_error",Float64MultiArray, self.get_error)
+        rospy.Subscriber("block_yaw",Float32,self.get_yaw)
         rospy.sleep(1)
     
     def get_error(self, error_pixel):
         self.error_pixel = np.array(error_pixel.data).reshape(-1,1)
+
+    def get_yaw(self,yaw):
+        self.yaw = yaw.data
 
 def compute_joint_angles(error,angles,alpha=5e-3,pixel=True,yaw=0):
     q = np.array(angles).reshape(-1,1)
@@ -66,7 +71,8 @@ def servo_xy(arm_controller,servo,error_thresh = 8):
         print(servo.error_pixel,"FINAL ERROR")
         pose,fk_list = kin.forward_kinematics(q)
         x,y = pose["joint_4"][:2]
-        return (x,y)
+        theta = servo.yaw
+        return (x,y,theta)
     return None
 
 def servo_z(arm_controller,servo,mode='down',yaw=0):

@@ -78,6 +78,19 @@ def make_destination(center,levels):
     d = np.vstack(d_list)
     return d
 
+def move_structure(center,block_points):
+    x_center = 0
+    y_center = 0
+    for i in block_points:
+        x_center = x_center + i[0]
+        y_center = y_center + i[1]
+    x_center = x_center/len(block_points)
+    y_center = y_center/len(block_points)
+
+    new_block_points = [(x - x_center + center,y - y_center+center,theta) for x,y,theta in block_points]
+    return new_block_points
+
+
 if __name__ =="__main__":
     rospy.init_node('marker_publisher', anonymous=True)
     estimator = tag_estimator()

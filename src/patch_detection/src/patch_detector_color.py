@@ -63,7 +63,7 @@ class block_color():
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
-        dim_low = 1000
+        dim_low = 600
         shape_low = 5.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
@@ -88,7 +88,7 @@ class block_color():
                 box = cv2.boxPoints(rect)
                 idx = np.argmax([np.linalg.norm(box[i]-box[i+1]) for i in range(len(box)-1)])
                 angle = np.degrees(math.atan2(box[idx+1,1] -  box[idx,1], box[idx+1,0] -  box[idx,0]))
-                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col,angle]).astype(int))
+                self.circle_list.append(np.array([np.average(box[:,0]),np.average(box[:,1]),col,angle,area]).astype(int))
                 box_list.append(np.int0(box))
                 area_max = area
 
@@ -114,27 +114,35 @@ class block_color():
         # 0.0, 619.2664184570312, 246.47152709960938, 0.0, 
         # 0.0, 0.0, 1.0, 0.0
         circles = self.circle_list
-        bridge = CvBridge()
-        cv_image = bridge.imgmsg_to_cv2(im, "passthrough")
-        f_x = 618.7474975585938
-        f_y = 619.2664184570312
-        u_0 = 324.06787109375
-        v_0 = 246.47152709960938
-        window = 3
-        current_msg = blocks_detected()
-        if(self.flag_block == True):
-            for points in circles:
-                point_int = np.round(points).astype(int)
-                self.z_center = np.average(cv_image[point_int[1]-window:point_int[1]+window,point_int[0]-window:point_int[0]+window])
-                self.x_center = (points[0]-u_0)*self.z_center/f_x
-                self.y_center = (points[1]-v_0)*self.z_center/f_y
-                self.position_list.color.append(points[2])
-                self.position_list.angle.append(points[3])
-                self.position_list.x.append(self.x_center)
-                self.position_list.y.append(self.y_center)
-                self.position_list.z.append(self.z_center)
+        if len(circles)==4:
+            a = np.vstack(circles)
+            a = a[np.argsort(a[:,-1]),:]
+            if(a[0,0] > a[1,0]):
+                tmp = a[1,:]
+                a[1,:] = a[0,:]
+                a[0,:] = tmp
 
-            self.flag_depth = True
+            bridge = CvBridge()
+            cv_image = bridge.imgmsg_to_cv2(im, "passthrough")
+            f_x = 618.7474975585938
+            f_y = 619.2664184570312
+            u_0 = 324.06787109375
+            v_0 = 246.47152709960938
+            window = 2
+            current_msg = blocks_detected()
+            if(self.flag_block == True):
+                for points in a:
+                    point_int = np.round(points).astype(int)
+                    self.z_center = np.average(cv_image[point_int[1]-window:point_int[1]+window,point_int[0]-window:point_int[0]+window])
+                    self.x_center = (points[0]-u_0)*self.z_center/f_x
+                    self.y_center = (points[1]-v_0)*self.z_center/f_y
+                    self.position_list.color.append(points[2])
+                    self.position_list.angle.append(points[3])
+                    self.position_list.x.append(self.x_center)
+                    self.position_list.y.append(self.y_center)
+                    self.position_list.z.append(self.z_center)
+
+                self.flag_depth = True
 
 
     def control_loop(self):

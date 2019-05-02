@@ -40,7 +40,7 @@ class tag_estimator:
             H = kin.rot_H(R)
             p_t = np.dot(H,p)
             p_end = [p_t[1],p_t[2],p_t[0],1]
-            self.p.append(p_end)
+            self.p.append((p_end,c))
 
 
     def set_point(self):
@@ -61,7 +61,7 @@ def make_trajectory(s,d,yaw=False):
                 d[:3]+np.array([0,0,0.09])]
     grip_list = [False,True,True,True,False,False]
     if yaw:
-        yaw_list = [0,0,np.pi/2,np.pi/2,np.pi/2,0]
+        yaw_list = [0,0,0,np.pi/2,np.pi/2,0]
     else:
         yaw_list = [0,0,0,0,0,0]
     return p_list,grip_list,yaw_list

@@ -5,7 +5,7 @@ import cv2
 import numpy as np 
 import rospy
 from sensor_msgs.msg import Image
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray, Int32 
 from cv_bridge import CvBridge, CvBridgeError
 from rospy.numpy_msg import numpy_msg
 from rospy_tutorials.msg import Floats
@@ -35,6 +35,7 @@ class webcam_node:
         rospy.init_node('webcam_publisher', anonymous=True)
         self.image_pub = rospy.Publisher("webcam",Image,queue_size = 1)
         self.bridge = CvBridge()
+        self.color_sub = rospy.Subscriber('block_color',Int32,self.update_color)
 
         self.y = 20
         self.z = 40
@@ -42,6 +43,7 @@ class webcam_node:
         self.error_pub = rospy.Publisher("pixel_error",Float64MultiArray,queue_size = 1)
         params.minThreshold = 10
         params.maxThreshold = 400
+        self.color_mask = -1
 
 
         # Filter by Area.
@@ -61,18 +63,25 @@ class webcam_node:
         # params.minInertiaRatio = 0.01
         # self.detector = cv2.SimpleBlobDetector_create(params)
 
+    def update_color(self,color):
+            self.color_mask = color.data
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(4)
+        cap = cv2.VideoCapture(1)
         while not rospy.is_shutdown():
 
             ret, frame = cap.read()
             # frame = cv2.GaussianBlur(frame,15,0)
             height,width = frame.shape[0:2]
             hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
-            # maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255))
-            center = find_block_center(frame,maskred)
+            print(self.color_mask)
+            if self.color_mask == 0:
+                mask = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
+            elif self.color_mask == 1:
+                mask = cv2.inRange(hsv_image, (20,50,0),(70,255,255))
+            else:
+                mask = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
+            center = find_block_center(frame,mask)
             # keypoints = self.detector.detect(frame) 
             # if len(keypoints) is not 0:
             if np.any(center):

@@ -38,16 +38,18 @@ class block_color():
     def find_block(self,im):
         #This function takes in rgb image and find the block
         bridge = CvBridge()
-        cv_image = bridge.imgmsg_to_cv2(im, "bgr8")
-        cv_image = scipy.ndimage.gaussian_filter(cv_image,sigma=0.8)
+        cv_ori = bridge.imgmsg_to_cv2(im, "bgr8")
+        cv2.imshow("Realsense Image",cv_ori)
+        cv2.waitKey(1)
+        cv_image = scipy.ndimage.gaussian_filter(cv_ori,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
-        maskred = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
-        maskgreen = cv2.inRange(hsv_image, (20,50,0),(70,255,255)) #create mask of colours
-        maskblue = cv2.inRange(hsv_image, (100,150,0),(110,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
+        maskgreen = cv2.inRange(hsv_image, (20,40,0),(50,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (100,60,0),(110,255,255)) #create mask of colours
 
-        result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen)
-        # cv2.imshow("lol",result)
-        # cv2.waitKey(1)
+        result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen+maskred+maskblue)
+        cv2.imshow("Segmented Image",result)
+        cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
 
@@ -63,7 +65,7 @@ class block_color():
         red_len = len(red_contours)
         green_len = len(green_contours)
         blue_len = len(blue_contours)
-        dim_low = 1000
+        dim_low = 3000
         shape_low = 5.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
@@ -94,7 +96,7 @@ class block_color():
 
 
         if(area_max > 0):
-            image_used = result
+            image_used = cv_ori
             [cv2.drawContours(image_used,[boxes],0,(0,0,255),2) for boxes in box_list]
             [cv2.circle(image_used,(circle[0],circle[1]), 5, (0,0,255), -1) for circle in self.circle_list]
 

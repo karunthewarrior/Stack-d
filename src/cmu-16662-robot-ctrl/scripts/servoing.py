@@ -52,7 +52,7 @@ def compute_joint_angles(error,angles,alpha=5e-3,pixel=True,yaw=0):
 #         return (x,y)
 #     return None
 
-def servo_xy(arm_controller,servo,error_thresh = 8):
+def servo_xy(arm_controller,servo,error_thresh = 8,alpha=5e-3):
 
     if not np.all(servo.error_pixel[:3] == 0):
         q = arm_controller.joint_state
@@ -60,12 +60,12 @@ def servo_xy(arm_controller,servo,error_thresh = 8):
         timer_current = timer
         while np.any(np.abs(servo.error_pixel) > error_thresh) or (timer_current - timer < 1):
             # print(np.any(np.abs(servo.error_pixel) > error_thresh))
-            print(servo.error_pixel,"errorpix")
+            # print(servo.error_pixel,"errorpix")
             if np.all(np.abs(servo.error_pixel) < error_thresh):
                 timer_current = rospy.get_rostime().to_sec()
             else:
                 angles = arm_controller.joint_state
-                q = compute_joint_angles(servo.error_pixel,angles)
+                q = compute_joint_angles(servo.error_pixel,angles,alpha=alpha)
                 arm_controller.set_joint_state(q)
                 rospy.sleep(0.5)
         print(servo.error_pixel,"FINAL ERROR")

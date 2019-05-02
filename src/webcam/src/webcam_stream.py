@@ -74,15 +74,13 @@ class webcam_node:
             self.color_mask = color.data
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(4)
         while not rospy.is_shutdown():
 
             ret, frame = cap.read()
             # frame = cv2.GaussianBlur(frame,15,0)
             height,width = frame.shape[0:2]
             hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            print(self.color_mask)
-            self.color_mask = 0
             if self.color_mask == 0:
                 mask = cv2.inRange(hsv_image,(1,100,0),(14,255,255)) #create mask of colours
             elif self.color_mask == 1:

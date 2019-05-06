@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 import rospy
 from sensor_msgs.msg import JointState
@@ -122,30 +120,18 @@ class CamController():
             self.history = []
         return converged
 
+# Usage Example:
 if __name__ == "__main__":
     #Initializing rospy and initializing the arm and camera objects
     rospy.init_node('controller_test', anonymous=True)
     arm_controller = ArmController()
     tilt_controller = CamController('/tilt/state','/tilt/command')
     pan_controllelr = CamController('/pan/state','/pan/command')
-    target_pan = np.deg2rad([0,20,-20,0])
-    target_tilt = np.deg2rad([0,20,-20,0])
-    # rospy.sleep(2)
-    # target_joints = [[0,0,0,0,0],[0,10,20,0,0]]
     target_joints = []
-    pos_list = [[ 0.3, 0.1, 0]]
-    # pos_list = [[]] 
-    # for tilt in target_tilt:
-    #     tilt_controller.set_cam_state(tilt)
-    #     while(not tilt_controller.has_converged()):
-    #         pass
-    # for pan in target_pan:
-    #     pan_controller.set_cam_state(pan)
-    #     while(not pan_controller.has_converged()):
-    #         pass
-
-    for pos in pos_list:
-        q = kin.inverse_kinematics(pos,np.deg2rad(45))
+    pos_list = [[ 0.25, 0.1, 0],[0.25,-0.1,0]]
+    yaw_list = [0,90]
+    for pos,yaw in zip(pos_list,yaw_list):
+        q = kin.inverse_kinematics(pos,yaw)
         if q!=None:
             target_joints.append(q)
         else:
@@ -153,8 +139,6 @@ if __name__ == "__main__":
             exit()
     rospy.sleep(2)
 
-    # target_joints = [[np.deg2rad(20),0,0,0,0]]
-    # print(target_joints)
     arm_controller.home_arm()
     arm_controller.open()
     for joint in target_joints:
@@ -162,4 +146,3 @@ if __name__ == "__main__":
         while(not arm_controller.has_converged()):
             pass
     arm_controller.close()
-    # controller.home_arm()

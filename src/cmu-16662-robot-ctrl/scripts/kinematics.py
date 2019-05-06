@@ -113,31 +113,32 @@ def jacobian(fk_list,full=False):
     return np.hstack(jac)
 
 """
-Computes the jacobian corresponding to the 3D position of a point in task space (in our case position of joint_1 to joint_4).
-Since we are only concerned with the position of the third joint, our jacobian is of shape 3x3.
-Input: fk_list - List of homogenous transformations for each joint computed by the forward kinematics
-Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D postion of each joint.
+Solves the inverse kinematics problem to find the joint angles that result in positioning the end effector at the target location.
+Our method positions joint 3 at a location that is calculated using the offset between the gripper and joint 3.
+The angles for joint 4 and joint 5 are computed such that the gripper is parallel to the ground and achives the required yaw angle.
+Input: target_pose - numpy array containing the target position
+       yaw - float value containing the desired yaw in radians
+       max_iter - max number of iterations before the loop times out. If a solution is not found within the error threshold,
+                  the function times out.
+Output: q - joint angles that are the solution to the inverse kinematics
 """
-def inverse_kinematics(target_pose,yaw=0,open_grip=True,max_iter=1000,offset=True):
+def inverse_kinematics(target_pose,yaw=0,max_iter=1000):
     #Computing gripper offset to account for error in end effector position
     gripper_offset = np.array([0, 0, 0.23])
-    if offset:
-        target_pose = target_pose + gripper_offset
+    target_pose = target_pose + gripper_offset
     #Initializing joint angles
     q = np.zeros((5,1))
     q[0] = -np.pi/4
     q[1] = np.pi/4
     q[2] = np.pi/5
 
-    #TODO initialze x to the position of joint_4 given the initial joint configuration. Currently zero works so not changing. 
-    #The motivation to change it would be so that we can get straight line paths from initial to target position.
     x = np.zeros(3)    
     dx = target_pose - x
 
     i = 0
     while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
-            print("timeout")
+            print("Timeout")
             return None
         i +=1
         #Computing the pose of the joints and the jacobian
@@ -161,6 +162,7 @@ def inverse_kinematics(target_pose,yaw=0,open_grip=True,max_iter=1000,offset=Tru
     if (np.all(abs(q[:3]) >= 0) and np.all(abs(q[:3]) <= np.pi/2)):
         return list(q.reshape(-1,)) 
     else:
+        print("Solution not within joint limits")
         return None
   
 #Helper function to map an angle in the fourth quadrant to a negative value    
@@ -176,15 +178,7 @@ def map_angle(a):
     else:
         return float(a)
 
+#Usage Example:
 if __name__ == "__main__":
-    # pos_list = [[0.3,0.02,0.1]]
-    # q = [0,0,0,0,0]
-    # _,fk_list = forward_kinematics(q)
-    # jac = jacobian(fk_list,full=True)
-    # print(jac)
-    # for pos in pos_list:
-    #     q = inverse_kinematics(pos,0)
-    #     print(q)
-    q = np.array([-0.37582532,  0.31600004,  0.34207773,0,0]).reshape(-1,1)
-    final_pos,_ = forward_kinematics(q)
-    print(final_pos)
+    output_angles = inverse_kinematics(np.array([ 0.23574115, -0.11669366,  0.15680248]))
+    print("Output joint angles: ",output_angles)

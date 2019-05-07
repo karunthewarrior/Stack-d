@@ -138,6 +138,7 @@ def inverse_kinematics(target_pose,yaw=0,open_grip=True,max_iter=1000,offset=Tru
     while(np.any(np.absolute(dx) > 1e-4)):
         if i == max_iter:
             print("timeout")
+            print(target_pose,"pose")
             return None
         i +=1
         #Computing the pose of the joints and the jacobian

@@ -18,7 +18,7 @@ if __name__ =="__main__":
     pan_controller = ac.CamController('/pan/state','/pan/command')
     rospy.sleep(0.5)
 ###################################################################
-    pan_controller.set_cam_state(np.deg2rad(-10))
+    pan_controller.set_cam_state(np.deg2rad(-15))
     while(not pan_controller.has_converged()):
         pass
     tilt_controller.set_cam_state(np.deg2rad(-42))
@@ -31,7 +31,7 @@ if __name__ =="__main__":
     servo_height = 0.04
     rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 3:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:
@@ -53,6 +53,7 @@ if __name__ =="__main__":
             destination_list.append((x+(math.cos(theta)*0.037),y+(math.sin(theta)*0.037),theta))
         else:
             print("No solution")
+
             exit()
 
 
@@ -60,7 +61,7 @@ if __name__ =="__main__":
     # destination_list = [(0.22331957748384187, -0.12810423965076156, -0.4035348892211914), (0.22159798903887126, -0.24227360593643243, 0.38050639629364014), (0.17225704439775558, -0.21728558998308453, 1.5083775520324707), (0.3067707448908044, -0.17565317508125985, -1.5204188823699951)]
     # destination_list = [(x+(math.cos(theta)*0.037),y+(math.sin(theta)*0.037),theta)  for x,y,theta in destination_list] 
     
-    drop_center = (0.28,0.19)
+    drop_center = (0.26,0.18)
     destination = tag.move_structure(drop_center,destination_list)
     print(destination,"DEST")
     # rospy.sleep(3)    
@@ -90,7 +91,7 @@ if __name__ =="__main__":
     servo_height = 0.035
     rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 3:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:

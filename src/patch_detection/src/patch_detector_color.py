@@ -44,11 +44,20 @@ class block_color():
         cv_image = scipy.ndimage.gaussian_filter(cv_ori,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
-        maskgreen = cv2.inRange(hsv_image, (20,40,0),(50,255,255)) #create mask of colours
-        maskblue = cv2.inRange(hsv_image, (100,60,0),(110,255,255)) #create mask of colours
+        maskgreen = cv2.inRange(hsv_image, (20,30,0),(50,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (100,90,0),(110,255,255)) #create mask of colours
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen+maskred+maskblue)
-        cv2.imshow("Segmented Image",result)
+        kernel = np.ones((5,5),np.uint8)
+
+        maskblue = cv2.erode(maskblue,kernel,iterations = 3)
+        maskblue = cv2.dilate(maskblue,kernel,iterations = 3)
+
+        maskgreen = cv2.erode(maskgreen,kernel,iterations = 3)
+        maskgreen = cv2.dilate(maskgreen,kernel,iterations = 4)
+
+
+        cv2.imshow("Segmented Image", maskgreen)
         cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
@@ -66,7 +75,7 @@ class block_color():
         green_len = len(green_contours)
         blue_len = len(blue_contours)
         dim_low = 2000
-        shape_low = 4.0
+        shape_low = 3.0
         # result = cv2.drawContours(cv_image, green_contours, -1, (52, 198, 30))
         area_max = 0
         box_list = []

@@ -170,8 +170,8 @@ bool PositionControl::initArm()
   dxl_wb_arm_->itemWrite(dxl_id_arm_[4], "Position_P_Gain", 1500);
 
   // dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_I_Gain", 50);
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_D_Gain", 0);
-  dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_P_Gain", 1200);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_D_Gain", 0);
+  // dxl_wb_arm_->itemWrite(dxl_id_arm_[5], "Position_P_Gain", 1000);
 
 
 

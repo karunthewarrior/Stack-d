@@ -122,6 +122,12 @@ class block_color():
                 a[1,:] = a[0,:]
                 a[0,:] = tmp
 
+            print('bottom left:',a[0,2])
+            print('bottom right:',a[1,2])
+            print('top further:',a[2,2])
+            print('top closer:',a[3,2])
+            
+
             bridge = CvBridge()
             cv_image = bridge.imgmsg_to_cv2(im, "passthrough")
             f_x = 618.7474975585938

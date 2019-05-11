@@ -59,14 +59,14 @@ if __name__ =="__main__":
                 yaw_flag = False
             traj,grip,yaw_list = tag.make_trajectory(s,dest,yaw_flag)
             for ind,(pt,g,yaw) in enumerate(zip(traj,grip,yaw_list)):
-                q = kin.inverse_kinematics(pt,theta)
+                q = kin.inverse_kinematics(pt,yaw)
                 arm_controller.set_joint_state(q)
 
                 while(not arm_controller.has_converged()):
                     pass
                 if ind == 1 or ind ==4:
-                    serv.servo_z(arm_controller,servo,'down',yaw=theta)
-                    serv.servo_z(arm_controller,servo,'down',yaw=theta)
+                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
                 if g:
                     arm_controller.close()
                 else:

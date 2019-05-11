@@ -43,22 +43,35 @@ class block_color():
         cv2.waitKey(1)
         cv_image = scipy.ndimage.gaussian_filter(cv_ori,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
+        # maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
+        # maskgreen = cv2.inRange(hsv_image, (20,40,0),(50,255,255)) #create mask of colours
+        # maskblue = cv2.inRange(hsv_image, (100,60,0),(110,255,255)) #create mask of colours
         maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
-        maskgreen = cv2.inRange(hsv_image, (20,40,0),(50,255,255)) #create mask of colours
-        maskblue = cv2.inRange(hsv_image, (100,60,0),(110,255,255)) #create mask of colours
+        maskgreen = cv2.inRange(hsv_image, (20,30,0),(50,255,255)) #create mask of colours
+        maskblue = cv2.inRange(hsv_image, (100,90,0),(110,255,255))
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen+maskred+maskblue)
         cv2.imshow("Segmented Image",result)
         cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
+        kernel = np.ones((5,5),np.uint8)
 
-        # red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        # green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        _,red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        _,blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        _,green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        maskblue = cv2.erode(maskblue,kernel,iterations = 3)
+        maskblue = cv2.dilate(maskblue,kernel,iterations = 3)
+
+        maskgreen = cv2.erode(maskgreen,kernel,iterations = 3)
+        maskgreen = cv2.dilate(maskgreen,kernel,iterations = 3)
+
+        maskred = cv2.erode(maskred,kernel,iterations = 3)
+        maskred = cv2.dilate(maskred,kernel,iterations = 3)
+
+        red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # _,red_contours, hierarchy = cv2.findContours(maskred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # _,blue_contours, hierarchy = cv2.findContours(maskblue, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        # _,green_contours, hierarchy = cv2.findContours(maskgreen, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         big_contours = red_contours+green_contours+blue_contours
 

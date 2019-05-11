@@ -29,9 +29,9 @@ if __name__ =="__main__":
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
     servo_height = 0.04
-    rospy.sleep(1)
+    rospy.sleep(10)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 3:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:
@@ -48,7 +48,7 @@ if __name__ =="__main__":
             print("reached set point")
             rospy.sleep(1)
             print("servoing in xy now")
-            (x,y,theta) = serv.servo_xy(arm_controller,servo,alpha=4e-3,error_thresh=30)
+            (x,y,theta) = serv.servo_xy(arm_controller,servo,alpha=4e-3,error_thresh=20)
             print("Finished servoing xy")
             destination_list.append((x+(math.cos(theta)*0.037),y+(math.sin(theta)*0.037),theta))
         else:
@@ -60,12 +60,12 @@ if __name__ =="__main__":
     # destination_list = [(0.22331957748384187, -0.12810423965076156, -0.4035348892211914), (0.22159798903887126, -0.24227360593643243, 0.38050639629364014), (0.17225704439775558, -0.21728558998308453, 1.5083775520324707), (0.3067707448908044, -0.17565317508125985, -1.5204188823699951)]
     # destination_list = [(x+(math.cos(theta)*0.037),y+(math.sin(theta)*0.037),theta)  for x,y,theta in destination_list] 
     
-    drop_center = (0.28,0.19)
+    drop_center = (0.27,0.18)
     destination = tag.move_structure(drop_center,destination_list)
     print(destination,"DEST")
     # rospy.sleep(3)    
     print("FINISHED SCENE ANALYSIS- BUILDING STRUCTURE")
-    rospy.sleep(2)
+    rospy.sleep(1)
     pan_controller.set_cam_state(0.432582587004)
 
 
@@ -83,14 +83,14 @@ if __name__ =="__main__":
     tilt_controller.set_cam_state(-0.696427)
     while(not tilt_controller.has_converged()):
         pass
-    rospy.sleep(0.5)
+    rospy.sleep(2)
     print("DONE")
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
     servo_height = 0.035
     rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 3:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:
@@ -119,8 +119,10 @@ if __name__ =="__main__":
 
                 while(not arm_controller.has_converged()):
                     pass
-                if ind == 1 or ind ==4:
+                if ind == 1:
                     serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                if ind == 4:
                     serv.servo_z(arm_controller,servo,'down',yaw=yaw)
                 if g:
                     arm_controller.close()

@@ -39,20 +39,20 @@ class block_color():
         #This function takes in rgb image and find the block
         bridge = CvBridge()
         cv_ori = bridge.imgmsg_to_cv2(im, "bgr8")
-        cv2.imshow("Realsense Image",cv_ori)
-        cv2.waitKey(1)
+        # cv2.imshow("Realsense Image",cv_ori)
+        # cv2.waitKey(1)
         cv_image = scipy.ndimage.gaussian_filter(cv_ori,sigma=0.8)
         hsv_image = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
         # maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
         # maskgreen = cv2.inRange(hsv_image, (20,40,0),(50,255,255)) #create mask of colours
         # maskblue = cv2.inRange(hsv_image, (100,60,0),(110,255,255)) #create mask of colours
-        maskred = cv2.inRange(hsv_image,(1,70,0),(14,255,255)) #create mask of colours
+        maskred = cv2.inRange(hsv_image,(5,70,0),(14,255,255)) #create mask of colours
         maskgreen = cv2.inRange(hsv_image, (20,30,0),(50,255,255)) #create mask of colours
         maskblue = cv2.inRange(hsv_image, (100,90,0),(110,255,255))
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen+maskred+maskblue)
-        cv2.imshow("Segmented Image",result)
-        cv2.waitKey(1)
+        # cv2.imshow("Segmented Image",result)
+        # cv2.waitKey(1)
         self.circle_list = []
         result = cv_image
         kernel = np.ones((5,5),np.uint8)

@@ -76,7 +76,7 @@ class webcam_node:
             self.color_mask = color.data
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
         while not rospy.is_shutdown():
             kernel = np.ones((5,5),np.uint8)
 

@@ -52,7 +52,7 @@ def compute_joint_angles(error,angles,alpha=5e-3,pixel=True,yaw=0):
 #         return (x,y)
 #     return None
 
-def servo_xy(arm_controller,servo,error_thresh = 8,alpha=5e-3):
+def servo_xy(arm_controller,servo,error_thresh = 10,alpha=5e-3):
 
     if not np.all(servo.error_pixel[:3] == 0):
         q = arm_controller.joint_state
@@ -87,7 +87,7 @@ def servo_z(arm_controller,servo,mode='down',yaw=0):
     pose,fk_list = kin.forward_kinematics(angles)
     current_pos = pose["joint_4"][0:3]
     error = (end_pos - current_pos).reshape(-1,1)
-    q = compute_joint_angles(error,angles,alpha=1,pixel=False,yaw=yaw)
+    q = compute_joint_angles(error,angles,alpha=0.9,pixel=False,yaw=yaw)
     arm_controller.set_joint_state(q)
     rospy.sleep(1)
 

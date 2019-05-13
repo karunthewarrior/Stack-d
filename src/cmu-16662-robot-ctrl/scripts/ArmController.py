@@ -29,6 +29,7 @@ class ArmController():
         self.joint_target = joint_target
         joint_state = JointState()
         joint_state.position = tuple(joint_target)
+        self.set_time = rospy.get_rostime()
         self.pub.publish(joint_state)
 
 #Moves the arm to the home configuration
@@ -58,11 +59,17 @@ class ArmController():
 
     def has_converged(self):
         converged = False
+        converge_time = (rospy.get_rostime()-self.set_time).to_sec()
+        if converge_time > 20:
+            current_state = self.joint_target
+            self.set_joint_state(current_state + np.array([0,-0.08,-0.08,0,0]))
+            rospy.sleep(1)
+            self.set_joint_state(current_state)
         # print(abs(self.joint_state-self.joint_target) < 0.0174533)
-        if(np.all(abs(self.joint_state-self.joint_target) < 3*0.0174533)):
+        if(np.all(abs(self.joint_state-self.joint_target) < 2*0.0174533)):
             self.history.append(self.time)
             # rospy.loginfo((self.time - self.history[0]).to_sec())
-            if (self.time - self.history[0]).to_sec() > 1:
+            if (self.time - self.history[0]).to_sec() > 2:
                 converged = True
         else:
             self.history = []   

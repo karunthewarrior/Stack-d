@@ -81,10 +81,10 @@ def make_destination(center,levels):
     dist_x, dist_y = 0.06,0.06
     d_list = []
     for l in range(levels):
-        d = np.array([[0,-dist_y/2,(l-1)*0.04],
-                    [0,dist_y/2,(l-1)*0.04],
-                    [-dist_x/2,0,l*0.04],
-                    [dist_x/2,0,l*0.04]]) + center
+        d = np.array([[0,-dist_y/2,(l-1)*0.012],
+                    [0,dist_y/2,(l-1)*0.012],
+                    [-dist_x/2,0,l*0.012],
+                    [dist_x/2,0,l*0.012]]) + center
         d_list.append(d)
     d = np.vstack(d_list)
     return d

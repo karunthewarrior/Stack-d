@@ -120,7 +120,7 @@ Output: jacobian - 3x3 matrix relating the change in joint angle to change in 3D
 """
 def inverse_kinematics(target_pose,yaw=0,open_grip=True,max_iter=1000,offset=True):
     #Computing gripper offset to account for error in end effector position
-    gripper_offset = np.array([0, 0, 0.23])
+    gripper_offset = np.array([0, 0, 0.20])
     if offset:
         target_pose = target_pose + gripper_offset
     #Initializing joint angles

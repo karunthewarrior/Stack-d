@@ -26,10 +26,10 @@ if __name__ =="__main__":
     print("DONE")
     H_c2w = kin.cam_to_world(estimator.pan,estimator.tilt)
     
-    servo_height = 0.03
+    servo_height = 0.05
     rospy.sleep(1)
     print(len(estimator.p),"YESAEAWSE")
-    if len(estimator.p) == 4:
+    if len(estimator.p) == 2:
         pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
         print(pw)
     else:
@@ -37,9 +37,9 @@ if __name__ =="__main__":
     # rospy.loginfo(estimator.position_camera)
     # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
     # arm_controller.home_arm()
-    destination = tag.make_destination(np.array([0.3,-0.13,-0.07]),levels=1)
-    print(pw)
-    for i,(pos,dest) in enumerate(zip(pw,destination)):
+    destination = tag.make_destination(np.array([0.30,0,-0.06]),levels=2)
+
+    for i,(pos,dest) in enumerate(zip(pw,destination[:4])):
         color_pub.publish(pos[3])
         q = kin.inverse_kinematics(pos[:3]+np.array([-0.037,0,servo_height]),0)  #ADD DESIRED YAW 
         if q!=None:
@@ -52,7 +52,7 @@ if __name__ =="__main__":
             print("servoing in xy now")
             (x,y,theta) = serv.servo_xy(arm_controller,servo)
             print("Finished servoing xy")
-            s = np.array([x+0.037,y,-0.08])
+            s = np.array([x+0.037,y,-0.085])
             if i > 1:
                 yaw_flag = True
             else:
@@ -64,30 +64,63 @@ if __name__ =="__main__":
 
                 while(not arm_controller.has_converged()):
                     pass
-                if ind == 1 or ind ==4:
+                if ind == 1:
                     serv.servo_z(arm_controller,servo,'down',yaw=yaw)
                     serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                if ind == 4:
+                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+
+                    final_value,_ = kin.forward_kinematics(arm_controller.joint_state)
+                    print("Position: ",final_value['gripper'][:3])
+                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
                 if g:
                     arm_controller.close()
                 else:
                     arm_controller.open()
-            # print(q,"angls")
-            # if q!=None:
-            #     arm_controller.set_joint_state(q)
-            #     while(not arm_controller.has_converged()):
-            #         pass
-            # q = kin.inverse_kinematics(np.array([x+0.037,y,-0.125]),0)
-            # print(q,"angls")
-            # if q!=None:
-            #     arm_controller.set_joint_state(q)
-            #     while(not arm_controller.has_converged()):
-            #         pass
-            # print("NO SOLUTION!!")
-            # print("servoing in z now")
-            # rospy.sleep(1)
-            # serv.servo_z(arm_controller,servo)
-            # arm_controller.close()
-
         else:
             print("No solution")
             exit()
+
+    # rospy.sleep(5)
+    # if len(estimator.p) == 4:
+    #     pw = [np.hstack([np.dot(H_c2w,p[0])[:2],servo_height,p[1]]) for p in estimator.p] #p[1] is color 
+    #     print(pw)
+    # else:
+    #     print("no block detected")
+
+    # for i,(pos,dest) in enumerate(zip(pw,destination[4:])):
+    #     color_pub.publish(pos[3])
+    #     q = kin.inverse_kinematics(pos[:3]+np.array([-0.037,0,servo_height]),0)  #ADD DESIRED YAW 
+    #     if q!=None:
+    #         arm_controller.set_joint_state(q)
+    #         while(not arm_controller.has_converged()):
+    #             pass 
+    #         arm_controller.open()
+    #         print("reached set point")
+    #         rospy.sleep(1)
+    #         print("servoing in xy now")
+    #         (x,y,theta) = serv.servo_xy(arm_controller,servo)
+    #         print("Finished servoing xy")
+    #         s = np.array([x+0.037,y,-0.085])
+    #         if i > 1:
+    #             yaw_flag = True
+    #         else:
+    #             yaw_flag = False
+    #         traj,grip,yaw_list = tag.make_trajectory(s,dest,yaw_flag)
+    #         for ind,(pt,g,yaw) in enumerate(zip(traj,grip,yaw_list)):
+    #             q = kin.inverse_kinematics(pt,yaw)
+    #             arm_controller.set_joint_state(q)
+
+    #             while(not arm_controller.has_converged()):
+    #                 pass
+    #             if ind == 1 or ind ==4:
+    #                 serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+    #                 # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+    #             if g:
+    #                 arm_controller.close()
+    #             else:
+    #                 arm_controller.open()
+    #     else:
+    #         print("No solution")
+    #         exit()

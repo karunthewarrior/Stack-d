@@ -37,7 +37,7 @@ if __name__ =="__main__":
     # rospy.loginfo(estimator.position_camera)
     # pos_list = [point1[:3]+np.array([0,0,0.05]),point1[:3],point1[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.05]),point2[:3]+np.array([0,0,0.02]),point2[:3]+np.array([0,0,0.05])]
     # arm_controller.home_arm()
-    destination = tag.make_destination(np.array([0.30,0,-0.06]),levels=2)
+    destination = tag.make_destination(np.array([0.30,-0.1,-0.08]),levels=2)
 
     for i,(pos,dest) in enumerate(zip(pw,destination[:4])):
         color_pub.publish(pos[3])
@@ -50,9 +50,13 @@ if __name__ =="__main__":
             print("reached set point")
             rospy.sleep(1)
             print("servoing in xy now")
-            (x,y,theta) = serv.servo_xy(arm_controller,servo)
+            # (x,y,theta) = serv.servo_xy(arm_controller,servo)
             print("Finished servoing xy")
-            s = np.array([x+0.037,y,-0.085])
+            # s = np.array([x+0.037,y,-0.09])
+            if i ==0:
+                s = np.array([0.24668384, 0.05143315, 0.10347439]) - np.array([0,0,0.195])
+            if i==1:
+                s = np.array([0.24998631, 0.13116532, 0.09960675]) - np.array([0,0,0.195])
             if i > 1:
                 yaw_flag = True
             else:
@@ -66,13 +70,16 @@ if __name__ =="__main__":
                     pass
                 if ind == 1:
                     serv.servo_z(arm_controller,servo,'down',yaw=yaw)
-                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
-                if ind == 4:
-                    serv.servo_z(arm_controller,servo,'down',yaw=yaw)
-                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
-
                     final_value,_ = kin.forward_kinematics(arm_controller.joint_state)
-                    print("Position: ",final_value['gripper'][:3])
+                    print("BLOCK",final_value['joint_4'][:3])
+                    print("ANGLES",arm_controller.joint_state)
+                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                if ind == 4:
+                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
+                    rospy.sleep(1)
+                    final_value,_ = kin.forward_kinematics(arm_controller.joint_state)
+                    print("Position: ",final_value['joint_4'][:3])
                     # serv.servo_z(arm_controller,servo,'down',yaw=yaw)
                 if g:
                     arm_controller.close()

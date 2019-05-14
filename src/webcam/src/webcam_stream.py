@@ -15,7 +15,7 @@ import scipy.ndimage
 
 def find_block_center(img,mask):
     thresh = cv2.bitwise_and(img, img, mask=mask)
-    contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    _,contours, hierarchy = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     area_max = 0
     box_list = []
 
@@ -76,7 +76,7 @@ class webcam_node:
             self.color_mask = color.data
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(1)
+        cap = cv2.VideoCapture(4)
         while not rospy.is_shutdown():
             kernel = np.ones((5,5),np.uint8)
 

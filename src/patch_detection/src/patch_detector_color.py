@@ -52,7 +52,7 @@ class block_color():
 
         result = cv2.bitwise_and(cv_image, cv_image, mask=maskgreen+maskred+maskblue)
         # cv2.imshow("Segmented Image",result)
-        # cv2.waitKey(1)
+        # cv2.waitKey()
         self.circle_list = []
         result = cv_image
         kernel = np.ones((5,5),np.uint8)

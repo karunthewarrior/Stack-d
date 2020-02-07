@@ -76,60 +76,62 @@ class webcam_node:
             self.color_mask = color.data
     def webcam_publisher(self):
         rate = rospy.Rate(10) # 10hz
-        cap = cv2.VideoCapture(4)
+        cap = cv2.VideoCapture(0)
         while not rospy.is_shutdown():
-            kernel = np.ones((5,5),np.uint8)
+            # kernel = np.ones((5,5),np.uint8)
 
 
             ret, frame = cap.read()
-            # frame = cv2.GaussianBlur(frame,15,0)
-            height,width = frame.shape[0:2]
-            frame = scipy.ndimage.gaussian_filter(frame,sigma=0.8)
-            hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            if self.color_mask == 0:
-                mask = cv2.inRange(hsv_image,(1,0,0),(14,255,255)) #create mask of colours
-                mask = cv2.erode(mask,kernel,iterations = 4)
-            elif self.color_mask == 1:
-                mask = cv2.inRange(hsv_image, (20,0,0),(50,255,255))
-                mask = cv2.erode(mask,kernel,iterations = 4)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            # # frame = cv2.GaussianBlur(frame,15,0)
+            # height,width = frame.shape[0:2]
+            # frame = scipy.ndimage.gaussian_filter(frame,sigma=0.8)
+            # hsv_image = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            # if self.color_mask == 0:
+            #     mask = cv2.inRange(hsv_image,(1,0,0),(14,255,255)) #create mask of colours
+            #     mask = cv2.erode(mask,kernel,iterations = 4)
+            # elif self.color_mask == 1:
+            #     mask = cv2.inRange(hsv_image, (20,0,0),(50,255,255))
+            #     mask = cv2.erode(mask,kernel,iterations = 4)
                 # mask = cv2.dilate(mask,kernel,iterations = 3)
 
-            else:
-                mask = cv2.inRange(hsv_image, (90,0,0),(120,255,255)) #create mask of colours
-                mask = cv2.dilate(mask,kernel,iterations = 6)
-                mask = cv2.erode(mask,kernel,iterations = 4)
+            # else:
+            #     mask = cv2.inRange(hsv_image, (90,0,0),(120,255,255)) #create mask of colours
+            #     mask = cv2.dilate(mask,kernel,iterations = 6)
+            #     mask = cv2.erode(mask,kernel,iterations = 4)
 
             # mask = cv2.erode(mask,kernel,iterations = 3)
-            center,angle = find_block_center(frame,mask)
+            # center,angle = find_block_center(frame,mask)
             # print()
 
-            self.angle_pub.publish(angle)
+            # self.angle_pub.publish(angle)
             # keypoints = self.detector.detect(frame) 
             # if len(keypoints) is not 0:
-            if np.any(center):
-                self.y,self.z = center[0],center[1]
-                self.error_pixel = np.array([0,self.y-width/2,self.z-height/2,1]).reshape(-1,1)
-                print(self.error_pixel)
-                error_pixel = Float64MultiArray()
-                error_pixel.data = self.error_pixel
-                self.error_pub.publish(error_pixel)
-                cv2.circle(frame,(center[0],center[1]), 5, (0,0,255), -1)
-            else:
-                error_pixel = Float64MultiArray()
-                error_pixel.data = np.array([0,0,0,1])
-                print("not found")
-                self.error_pub.publish(error_pixel)
+            # if np.any(center):
+            #     self.y,self.z = center[0],center[1]
+            #     self.error_pixel = np.array([0,self.y-width/2,self.z-height/2,1]).reshape(-1,1)
+            #     print(self.error_pixel)
+            #     error_pixel = Float64MultiArray()
+            #     error_pixel.data = self.error_pixel
+            #     self.error_pub.publish(error_pixel)
+            #     cv2.circle(frame,(center[0],center[1]), 5, (0,0,255), -1)
+            # else:
+            #     error_pixel = Float64MultiArray()
+            #     error_pixel.data = np.array([0,0,0,1])
+            #     print("not found")
+            #     self.error_pub.publish(error_pixel)
 
             try:
-                self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame))
+                self.image_pub.publish(self.bridge.cv2_to_imgmsg(frame,encoding="mono8"))
             except:
                 print("cannot publish")
             
 
             # im_with_keypoints = cv2.drawKeypoints(frame, keypoints, np.array([]), (0,0,255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
             
-            cv2.imshow("Keypoints", frame)
-            cv2.waitKey(1)
+            # cv2.imshow("Keypoints", frame)
+            # cv2.waitKey(1)
 
             rate.sleep()
 
